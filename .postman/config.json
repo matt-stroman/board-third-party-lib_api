@@ -3,9 +3,13 @@
     "id": "8fb6b19c-4c4a-41ff-9a87-d50a88bcf816"
   },
   "entities": {
-    "environments": [],
+    "environments": [
+      "postman/environments/board-third-party-library_local.postman_environment.json"
+    ],
     "flows": [],
-    "globals": [],
+    "globals": [
+      "postman/globals/workspace.postman_globals.json"
+    ],
     "mocks": [],
     "specs": [
       {
@@ -13,6 +17,8 @@
         "path": "postman/specs/board-third-party-library-api.v1.openapi.yaml"
       }
     ],
-    "collections": []
+    "collections": [
+      "postman/collections/board-third-party-library-api.generated.postman_collection.json"
+    ]
   }
 }
