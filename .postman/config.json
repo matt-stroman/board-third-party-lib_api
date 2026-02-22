@@ -1,0 +1,18 @@
+{
+  "workspace": {
+    "id": "8fb6b19c-4c4a-41ff-9a87-d50a88bcf816"
+  },
+  "entities": {
+    "environments": [],
+    "flows": [],
+    "globals": [],
+    "mocks": [],
+    "specs": [
+      {
+        "id": "board-third-party-library-api-v1",
+        "path": "postman/specs/board-third-party-library-api.v1.openapi.yaml"
+      }
+    ],
+    "collections": []
+  }
+}

@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: Board Third Party Library API
+  version: 1.0.0-draft
+  description: >
+    Contract-first API definition for the Board Third Party Library.
+    This initial slice defines service metadata and health endpoints.
+servers:
+  - url: http://localhost:5085
+    description: Local backend (development)
+tags:
+  - name: Health
+    description: Service metadata and health endpoints.
+paths:
+  /:
+    get:
+      tags: [Health]
+      summary: Get API metadata
+      description: Returns basic service metadata and advertised health endpoints.
+      operationId: getApiMetadata
+      responses:
+        '200':
+          description: API metadata returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMetadataResponse'
+              examples:
+                default:
+                  summary: Local development response
+                  value:
+                    service: board-third-party-lib-backend
+                    endpoints:
+                      - /health/live
+                      - /health/ready
+  /health/live:
+    get:
+      tags: [Health]
+      summary: Liveness health check
+      description: >
+        Indicates whether the API process is running. Does not check downstream dependencies.
+      operationId: getLivenessHealth
+      responses:
+        '200':
+          description: API process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  summary: Typical healthy liveness response
+                  value:
+                    status: Healthy
+                    checks: []
+                    durationMs: 0.2149
+  /health/ready:
+    get:
+      tags: [Health]
+      summary: Readiness health check
+      description: >
+        Indicates whether the API is ready to serve requests, including downstream dependency checks
+        (currently PostgreSQL connectivity).
+      operationId: getReadinessHealth
+      responses:
+        '200':
+          description: API is ready and dependencies are healthy.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  summary: PostgreSQL dependency is healthy
+                  value:
+                    status: Healthy
+                    checks:
+                      - name: postgres
+                        status: Healthy
+                        description: PostgreSQL connection succeeded.
+                        data:
+                          database: board_tpl
+                          user: board_tpl_user
+                    durationMs: 6.1373
+        '503':
+          description: API is running but not ready due to dependency failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                postgres-unhealthy:
+                  summary: PostgreSQL dependency failure
+                  value:
+                    status: Unhealthy
+                    checks:
+                      - name: postgres
+                        status: Unhealthy
+                        description: PostgreSQL connection failed.
+                    durationMs: 12.551
+components:
+  schemas:
+    ApiMetadataResponse:
+      type: object
+      required:
+        - service
+        - endpoints
+      properties:
+        service:
+          type: string
+          example: board-third-party-lib-backend
+        endpoints:
+          type: array
+          items:
+            type: string
+          example:
+            - /health/live
+            - /health/ready
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - checks
+        - durationMs
+      properties:
+        status:
+          type: string
+          description: Overall health status of the endpoint response.
+          enum:
+            - Healthy
+            - Degraded
+            - Unhealthy
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheckEntry'
+        durationMs:
+          type: number
+          format: double
+          description: Total duration of the health check execution in milliseconds.
+    HealthCheckEntry:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          example: postgres
+        status:
+          type: string
+          enum:
+            - Healthy
+            - Degraded
+            - Unhealthy
+        description:
+          type: string
+          nullable: true
+        data:
+          type: object
+          nullable: true
+          additionalProperties: true
