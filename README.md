@@ -52,22 +52,49 @@ The contract test collection now includes:
 ### Files used for mock-first work
 
 - `postman/environments/board-third-party-library_mock.postman_environment.json`
+- `postman/environments/board-third-party-library_mock-admin.postman_environment.json`
 - `postman/collections/postman-admin.board-third-party-library-mock-provisioning.postman_collection.json`
 - `postman/collections/board-third-party-library-api.contract-tests.postman_collection.json`
 
 ### Provision the mock server (code-driven in Postman)
 
-1. In Postman, import/sync the `Board Third Party Library - Mock` environment and select it.
-2. Set a local-only current value for `postmanApiKey` in that environment (do not commit secrets).
-3. Run `Postman Admin - Board Third Party Library Mock Provisioning`:
+1. In Postman, import/sync both environments:
+   - `Board Third Party Library - Mock` (day-to-day contract test runs)
+   - `Board Third Party Library - Mock Admin` (mock provisioning/maintenance)
+2. Select `Board Third Party Library - Mock Admin`.
+3. Add your Postman API key to **Postman Vault** as `postman-api-key` (local secret), so the admin collection can use `{{vault:postman-api-key}}`.
+4. Run `Postman Admin - Board Third Party Library Mock Provisioning`:
    - `Collections / List collections and resolve Contract Tests UID`
    - `Mocks / Create mock server (Contract Tests collection)`
-4. The collection test scripts will populate:
+5. The collection test scripts will populate in the **Mock Admin** environment:
    - `contractTestsCollectionUid`
    - `mockId`
    - `mockUrl`
    - `baseUrl` (set to the created mock URL)
-5. Run `Board Third Party Library API (Contract Tests)` against the same `Board Third Party Library - Mock` environment.
+6. Copy the `mockUrl` value from `Board Third Party Library - Mock Admin` into `Board Third Party Library - Mock` `baseUrl`.
+7. Run `Board Third Party Library API (Contract Tests)` against `Board Third Party Library - Mock`.
+
+### Why some mock-admin environment variables start blank
+
+These values are intentionally blank in the versioned **Mock Admin** environment template and are populated by the Postman admin provisioning collection after you run it:
+
+- `contractTestsCollectionUid`
+- `mockId`
+- `mockUrl`
+
+`baseUrl` in **Mock Admin** starts as a placeholder and is overwritten with `mockUrl` by the provisioning collection once the mock is created.
+
+### Making the Mock environment "ready to go"
+
+After the first mock server is created, set the real Postman mock URL in:
+
+- `Board Third Party Library - Mock` -> `baseUrl`
+
+If the mock URL is intended to be stable for the team, update the versioned file and commit it:
+
+- `postman/environments/board-third-party-library_mock.postman_environment.json`
+
+Then most day-to-day work only needs the `Board Third Party Library - Mock` environment, and the `Mock Admin` environment/collection are only used when the mock server must be created or repaired.
 
 ### Mock response selection notes
 

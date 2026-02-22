@@ -5,7 +5,8 @@
   "entities": {
     "environments": [
       "postman/environments/board-third-party-library_local.postman_environment.json",
-      "postman/environments/board-third-party-library_mock.postman_environment.json"
+      "postman/environments/board-third-party-library_mock.postman_environment.json",
+      "postman/environments/board-third-party-library_mock-admin.postman_environment.json"
     ],
     "flows": [],
     "globals": [

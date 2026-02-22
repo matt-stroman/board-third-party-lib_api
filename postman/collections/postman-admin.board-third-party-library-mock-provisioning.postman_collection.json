@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "2105612e-4326-4774-9d9e-fefa6f9767a9",
     "name": "Postman Admin - Board Third Party Library Mock Provisioning",
-    "description": "Provision and inspect the Postman mock server for the Board Third Party Library contract tests using the Postman API. Use with the Board Third Party Library - Mock environment.",
+    "description": "Provision and inspect the Postman mock server for the Board Third Party Library contract tests using the Postman API. Use with the Board Third Party Library - Mock Admin environment.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -14,11 +14,11 @@
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "X-Api-Key",
-                "value": "{{postmanApiKey}}",
-                "type": "text"
-              },
+							{
+								"key": "X-Api-Key",
+								"value": "{{vault:postman-api-key}}",
+								"type": "text"
+							},
               {
                 "key": "Accept",
                 "value": "application/json",
@@ -70,11 +70,11 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "X-Api-Key",
-                "value": "{{postmanApiKey}}",
-                "type": "text"
-              },
+							{
+								"key": "X-Api-Key",
+								"value": "{{vault:postman-api-key}}",
+								"type": "text"
+							},
               {
                 "key": "Accept",
                 "value": "application/json",
@@ -110,7 +110,7 @@
                 }
               ]
             },
-            "description": "Creates a mock server from the Git-tracked Contract Tests collection. Run the collection lookup first."
+            "description": "Creates a mock server from the Git-tracked Contract Tests collection. Run the collection lookup first. Use the Board Third Party Library - Mock Admin environment."
           },
           "event": [
             {
@@ -146,11 +146,11 @@
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "X-Api-Key",
-                "value": "{{postmanApiKey}}",
-                "type": "text"
-              },
+							{
+								"key": "X-Api-Key",
+								"value": "{{vault:postman-api-key}}",
+								"type": "text"
+							},
               {
                 "key": "Accept",
                 "value": "application/json",
@@ -166,7 +166,7 @@
                 "mocks"
               ]
             },
-            "description": "Lists mock servers and updates mockId/mockUrl for mockServerName when present."
+            "description": "Lists mock servers and updates mockId/mockUrl for mockServerName when present. Use the Board Third Party Library - Mock Admin environment."
           },
           "event": [
             {
