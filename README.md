@@ -124,6 +124,16 @@ Security mock validation coverage is included for current `/identity/me/*` endpo
 - `403 Forbidden`
 - `429 Too Many Requests`
 
+### Wave 1 auth semantics (contract guidance)
+
+The Wave 1 auth/password endpoints are still API-first contract work, but the contract now documents a few important behavioral expectations to keep backend implementation and client behavior aligned:
+
+- **Login and unverified email**: MVP may allow login before email verification so users can complete `/identity/me/email-addresses/*` verification flows. Clients should still check verification status before enabling sensitive actions.
+- **Refresh token rotation**: `POST /identity/auth/refresh` returns a replacement refresh token. Clients should store the new refresh token and discard the previously used token after a successful refresh.
+- **Logout scope**: `POST /identity/auth/logout` supports a request `scope` (`current_session` default, or `all_sessions`) and is intended to be idempotent for already-revoked session/refresh-token state (while still requiring a valid bearer token to call it).
+- **Password change effects**: successful password changes should invalidate outstanding password-reset challenges and revoke refresh-token/session state.
+- **Password reset security**: password reset requests should be anti-enumeration (generic response), and reset tokens/challenges should be short-lived and one-time-use. A successful reset should invalidate the used token and other outstanding reset challenges for the account.
+
 ### Provision the mock server (code-driven in Postman)
 
 The mock server is provisioned from a Postman **workspace collection object** selected by the Mock Admin environment.

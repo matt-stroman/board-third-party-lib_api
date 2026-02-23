@@ -586,6 +586,744 @@ paths:
           $ref: '#/components/responses/ForbiddenProblemResponse'
         '429':
           $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/me:
+    get:
+      tags: [Identity]
+      summary: Get current user profile
+      description: Returns the authenticated user's identity profile summary.
+      operationId: getCurrentUserProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user profile returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserProfileResponse'
+              examples:
+                default:
+                  summary: Authenticated user profile
+                  value:
+                    user:
+                      id: 9d65dc87-c5d2-4a1a-aac0-9414968e8b47
+                      displayName: Alex Rivers
+                      status: active
+                      roles:
+                        - player
+                        - developer
+                    primaryEmail:
+                      id: e7fb8793-8443-487b-9bfc-e5ef38145c4a
+                      email: alex@example.com
+                      verified: true
+                      isPrimary: true
+                      status: active
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/auth/login/email:
+    post:
+      tags: [Identity]
+      summary: Login with email and password
+      description: >
+        Authenticates a user with email/password credentials and issues bearer/refresh tokens.
+        Accounts with unverified email addresses may still be allowed to authenticate in MVP so they can
+        complete the `/identity/me/email-addresses/*` verification workflow; client applications should
+        evaluate email verification status before enabling sensitive actions.
+      operationId: loginWithEmail
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginWithEmailRequest'
+            examples:
+              default:
+                summary: Valid login request
+                value:
+                  email: alex@example.com
+                  password: StrongPassword!123
+      responses:
+        '200':
+          description: Login succeeded and tokens were issued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenPairResponse'
+              examples:
+                success:
+                  summary: Access and refresh tokens issued
+                  value:
+                    tokenType: Bearer
+                    accessToken: eyJhbGciOi...mock-access-token
+                    accessTokenExpiresInSeconds: 3600
+                    refreshToken: rft_mock_1234567890
+                    refreshTokenExpiresAt: '2026-03-02T12:00:00Z'
+                    user:
+                      id: 9d65dc87-c5d2-4a1a-aac0-9414968e8b47
+                      displayName: Alex Rivers
+                      status: active
+                      roles:
+                        - player
+                        - developer
+        '401':
+          description: Invalid email/password combination.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                invalid-credentials:
+                  summary: Invalid credentials
+                  value:
+                    type: https://boardtpl.dev/problems/invalid-credentials
+                    title: Invalid credentials
+                    status: 401
+                    detail: The email or password is incorrect.
+                    code: invalid_credentials
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                invalid-request:
+                  summary: Missing password
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      password:
+                        - Password is required.
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/auth/refresh:
+    post:
+      tags: [Identity]
+      summary: Refresh authentication tokens
+      description: >
+        Exchanges a valid refresh token for a new bearer token and a replacement refresh token.
+        The returned refresh token replaces the previously presented refresh token (rotation); clients
+        must persist the new refresh token and discard the old one after a successful response.
+      operationId: refreshAuthTokens
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshAuthTokensRequest'
+            examples:
+              default:
+                summary: Refresh token request
+                value:
+                  refreshToken: rft_mock_1234567890
+      responses:
+        '200':
+          description: Tokens refreshed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenPairResponse'
+              examples:
+                success:
+                  summary: Token refresh succeeded
+                  value:
+                    tokenType: Bearer
+                    accessToken: eyJhbGciOi...rotated-access-token
+                    accessTokenExpiresInSeconds: 3600
+                    refreshToken: rft_mock_rotated_1234567890
+                    refreshTokenExpiresAt: '2026-03-02T13:00:00Z'
+                    user:
+                      id: 9d65dc87-c5d2-4a1a-aac0-9414968e8b47
+                      displayName: Alex Rivers
+                      status: active
+                      roles:
+                        - player
+                        - developer
+        '401':
+          description: Refresh token is invalid, expired, or revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                invalid-refresh-token:
+                  summary: Refresh token invalid
+                  value:
+                    type: https://boardtpl.dev/problems/invalid-refresh-token
+                    title: Refresh token is invalid or expired
+                    status: 401
+                    detail: The refresh token is invalid, expired, or revoked.
+                    code: invalid_refresh_token
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                missing-refresh-token:
+                  summary: Refresh token required
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      refreshToken:
+                        - Refresh token is required.
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/auth/logout:
+    post:
+      tags: [Identity]
+      summary: Logout current session
+      description: >
+        Logs out the authenticated user by revoking refresh-token/session state according to the requested
+        logout scope. This endpoint is idempotent for already-revoked refresh tokens/session state, but a
+        valid bearer token is still required to invoke it.
+      operationId: logoutCurrentSession
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+            examples:
+              with-refresh-token:
+                summary: Logout and revoke refresh token
+                value:
+                  refreshToken: rft_mock_1234567890
+      responses:
+        '204':
+          description: >
+            Logout processed successfully (idempotent). Refresh-token/session state is revoked according to
+            the requested scope.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/me/password/change:
+    post:
+      tags: [Identity]
+      summary: Change password
+      description: >
+        Changes the authenticated user's local password credential. Implementations should invalidate
+        outstanding password-reset challenges and revoke refresh-token/session state after a successful
+        password change (current request may complete before revocation takes effect).
+      operationId: changeMyPassword
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+            examples:
+              default:
+                summary: Password change request
+                value:
+                  currentPassword: StrongPassword!123
+                  newPassword: EvenStrongerPassword!456
+      responses:
+        '204':
+          description: Password changed successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '409':
+          description: Current password is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                invalid-current-password:
+                  summary: Current password mismatch
+                  value:
+                    type: https://boardtpl.dev/problems/invalid-current-password
+                    title: Current password is incorrect
+                    status: 409
+                    detail: The provided current password does not match the stored credential.
+                    code: invalid_current_password
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                weak-password:
+                  summary: New password fails policy
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      newPassword:
+                        - Password must meet minimum complexity requirements.
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/password/forgot:
+    post:
+      tags: [Identity]
+      summary: Request password reset
+      description: >
+        Requests a password reset challenge for the supplied email address. Response is intentionally generic
+        to prevent account enumeration. Implementations should issue short-lived, one-time-use reset tokens
+        and may invalidate previously outstanding reset challenges for the same account when a new one is issued.
+      operationId: requestPasswordReset
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+            examples:
+              default:
+                summary: Password reset request
+                value:
+                  email: alex@example.com
+      responses:
+        '202':
+          description: Password reset request accepted for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedActionResponse'
+              examples:
+                accepted:
+                  summary: Generic accepted response
+                  value:
+                    accepted: true
+                    message: If an account exists for this email address, password reset instructions will be sent.
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                invalid-email:
+                  summary: Invalid email address format
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      email:
+                        - A valid email address is required.
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/password/reset:
+    post:
+      tags: [Identity]
+      summary: Reset password with verification token
+      description: >
+        Resets a user's password using a previously issued password-reset token/code. Reset tokens are
+        intended to be short-lived and one-time-use; a successful reset should invalidate the used token,
+        any other outstanding reset challenges for the account, and existing refresh-token/session state.
+      operationId: resetPassword
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+            examples:
+              default:
+                summary: Password reset completion request
+                value:
+                  email: alex@example.com
+                  resetToken: prt_mock_482913
+                  newPassword: EvenStrongerPassword!456
+      responses:
+        '204':
+          description: Password reset successfully.
+        '409':
+          description: Reset token is invalid, expired, or already used.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                invalid-reset-token:
+                  summary: Reset token invalid or expired
+                  value:
+                    type: https://boardtpl.dev/problems/password-reset-token-invalid
+                    title: Password reset token is invalid or expired
+                    status: 409
+                    detail: The password reset token is invalid, expired, or has already been used.
+                    code: password_reset_token_invalid
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                invalid-request:
+                  summary: Missing reset token
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      resetToken:
+                        - Reset token is required.
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/me/external-identities:
+    get:
+      tags: [Identity]
+      summary: List linked external identities
+      description: >
+        Lists third-party identity providers linked to the authenticated user (for example GitHub,
+        Steam, Epic). Board profile linkage is managed separately via `/identity/me/board-profile`.
+      operationId: listMyExternalIdentities
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Linked external identities returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalIdentityListResponse'
+              examples:
+                default:
+                  summary: User with linked external identity providers
+                  value:
+                    externalIdentities:
+                      - id: 2d405181-c86d-4a9d-a2f7-2d53f6e81630
+                        provider: github
+                        providerUserId: '12345678'
+                        providerDisplayName: alexrivers
+                        linkedAt: '2026-02-23T10:15:00Z'
+                      - id: a2aa9650-88bc-4879-9d7b-435dbb8b4888
+                        provider: steam
+                        providerUserId: '76561198000000000'
+                        providerDisplayName: AlexRiversSteam
+                        linkedAt: '2026-02-23T10:20:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+    post:
+      tags: [Identity]
+      summary: Link external identity
+      description: >
+        Completes linking an external identity provider account (for example GitHub/Steam/Epic) to
+        the authenticated user. Board profile linkage uses `/identity/me/board-profile`.
+      operationId: linkMyExternalIdentity
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkExternalIdentityRequest'
+            examples:
+              github:
+                summary: Complete GitHub link
+                value:
+                  provider: github
+                  authorizationCode: gh_oauth_code_mock_123
+                  redirectUri: boardtpl://auth/callback
+                  state: st_mock_123
+      responses:
+        '201':
+          description: External identity linked successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkExternalIdentityResponse'
+              examples:
+                created:
+                  summary: GitHub account linked
+                  value:
+                    externalIdentity:
+                      id: 2d405181-c86d-4a9d-a2f7-2d53f6e81630
+                      provider: github
+                      providerUserId: '12345678'
+                      providerDisplayName: alexrivers
+                      linkedAt: '2026-02-23T10:15:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '409':
+          description: External identity is already linked to another user or already linked to this user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                already-linked:
+                  summary: Provider identity already linked
+                  value:
+                    type: https://boardtpl.dev/problems/external-identity-already-linked
+                    title: External identity already linked
+                    status: 409
+                    detail: This external identity is already linked and cannot be linked again.
+                    code: external_identity_already_linked
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                missing-code:
+                  summary: Authorization code missing
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      authorizationCode:
+                        - Authorization code is required.
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/me/external-identities/{externalIdentityId}:
+    delete:
+      tags: [Identity]
+      summary: Unlink external identity
+      description: Removes a linked external identity from the authenticated user.
+      operationId: unlinkMyExternalIdentity
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: externalIdentityId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '204':
+          description: External identity unlinked successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '404':
+          description: External identity link not found for the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not-found:
+                  summary: Linked external identity not found
+                  value:
+                    type: https://boardtpl.dev/problems/external-identity-not-found
+                    title: External identity not found
+                    status: 404
+                    detail: The requested external identity link was not found for the current user.
+                    code: external_identity_not_found
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+  /identity/me/board-profile:
+    get:
+      tags: [Identity]
+      summary: Get linked Board profile
+      description: Returns the Board profile currently linked to the authenticated user, if any.
+      operationId: getMyBoardProfileLink
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Linked Board profile returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoardProfileLinkResponse'
+              examples:
+                linked:
+                  summary: Linked Board profile
+                  value:
+                    boardProfile:
+                      boardUserId: board_user_abc123
+                      boardDisplayName: Alex Rivers
+                      boardHandle: alexrivers
+                      linkedAt: '2026-02-23T10:20:00Z'
+                      lastSyncedAt: '2026-02-23T11:40:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '404':
+          description: No Board profile is linked to the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not-linked:
+                  summary: Board profile not linked
+                  value:
+                    type: https://boardtpl.dev/problems/board-profile-not-linked
+                    title: Board profile not linked
+                    status: 404
+                    detail: No Board profile is linked to the current user.
+                    code: board_profile_not_linked
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+    put:
+      tags: [Identity]
+      summary: Link or update Board profile
+      description: Links a Board profile to the authenticated user (or updates cached profile metadata).
+      operationId: upsertMyBoardProfileLink
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertBoardProfileLinkRequest'
+            examples:
+              default:
+                summary: Link Board profile
+                value:
+                  boardUserId: board_user_abc123
+                  boardDisplayName: Alex Rivers
+                  boardHandle: alexrivers
+      responses:
+        '200':
+          description: Board profile linked or updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoardProfileLinkResponse'
+              examples:
+                linked:
+                  summary: Board profile link saved
+                  value:
+                    boardProfile:
+                      boardUserId: board_user_abc123
+                      boardDisplayName: Alex Rivers
+                      boardHandle: alexrivers
+                      linkedAt: '2026-02-23T10:20:00Z'
+                      lastSyncedAt: '2026-02-23T11:40:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '409':
+          description: The Board profile is already linked to another user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                already-linked:
+                  summary: Board profile linked to another account
+                  value:
+                    type: https://boardtpl.dev/problems/board-profile-already-linked
+                    title: Board profile already linked
+                    status: 409
+                    detail: This Board profile is already linked to another user account.
+                    code: board_profile_already_linked
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                missing-board-user-id:
+                  summary: Board user ID missing
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      boardUserId:
+                        - Board user ID is required.
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
+    delete:
+      tags: [Identity]
+      summary: Unlink Board profile
+      description: Removes the current user's Board profile link.
+      operationId: unlinkMyBoardProfile
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '204':
+          description: Board profile unlinked successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblemResponse'
+        '404':
+          description: No Board profile is linked to the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not-linked:
+                  summary: Board profile not linked
+                  value:
+                    type: https://boardtpl.dev/problems/board-profile-not-linked
+                    title: Board profile not linked
+                    status: 404
+                    detail: No Board profile is linked to the current user.
+                    code: board_profile_not_linked
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblemResponse'
 components:
   parameters:
     PostmanMockResponseCodeHeader:
@@ -661,12 +1399,12 @@ components:
             $ref: '#/components/schemas/ProblemDetails'
           examples:
             rate-limited:
-              summary: Email verification action rate limited
+              summary: Operation rate limited
               value:
                 type: https://boardtpl.dev/problems/rate-limit-exceeded
                 title: Too Many Requests
                 status: 429
-                detail: Too many verification attempts were made. Retry after the cooldown period.
+                detail: Too many requests were made for this operation. Retry after the cooldown period.
                 code: rate_limit_exceeded
   schemas:
     ApiMetadataResponse:
@@ -923,6 +1661,261 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserEmailAddressSummary'
+    CurrentUserProfileResponse:
+      type: object
+      required:
+        - user
+        - primaryEmail
+      properties:
+        user:
+          $ref: '#/components/schemas/RegisteredUserSummary'
+        primaryEmail:
+          $ref: '#/components/schemas/UserEmailAddressSummary'
+    LoginWithEmailRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: alex@example.com
+        password:
+          type: string
+          format: password
+          minLength: 1
+          example: StrongPassword!123
+    RefreshAuthTokensRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+          example: rft_mock_1234567890
+    LogoutRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          nullable: true
+          example: rft_mock_1234567890
+          description: >
+            Optional refresh token to revoke. When omitted, the backend may infer the current session from
+            bearer/session context depending on implementation.
+        scope:
+          type: string
+          enum:
+            - current_session
+            - all_sessions
+          default: current_session
+          description: >
+            Logout scope. `current_session` revokes only the current session/refresh token. `all_sessions`
+            revokes all refresh-token/session state for the authenticated user.
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          format: password
+          minLength: 1
+        newPassword:
+          type: string
+          format: password
+          minLength: 8
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: alex@example.com
+    ResetPasswordRequest:
+      type: object
+      required:
+        - email
+        - resetToken
+        - newPassword
+      properties:
+        email:
+          type: string
+          format: email
+        resetToken:
+          type: string
+          minLength: 1
+          example: prt_mock_482913
+        newPassword:
+          type: string
+          format: password
+          minLength: 8
+    AcceptedActionResponse:
+      type: object
+      required:
+        - accepted
+        - message
+      properties:
+        accepted:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Request accepted for processing.
+    ExternalIdentitySummary:
+      type: object
+      required:
+        - id
+        - provider
+        - providerUserId
+        - providerDisplayName
+        - linkedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        provider:
+          type: string
+          description: External provider code (non-Board; use the dedicated Board profile endpoints for Board linkage).
+          example: github
+        providerUserId:
+          type: string
+          example: '12345678'
+        providerDisplayName:
+          type: string
+          example: alexrivers
+        linkedAt:
+          type: string
+          format: date-time
+    ExternalIdentityListResponse:
+      type: object
+      required:
+        - externalIdentities
+      properties:
+        externalIdentities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalIdentitySummary'
+    LinkExternalIdentityRequest:
+      type: object
+      required:
+        - provider
+        - authorizationCode
+        - redirectUri
+        - state
+      properties:
+        provider:
+          type: string
+          description: External provider code (for example `github`, `steam`, `epic`; not `board`).
+          example: github
+        authorizationCode:
+          type: string
+          minLength: 1
+          example: gh_oauth_code_mock_123
+        redirectUri:
+          type: string
+          format: uri
+          example: boardtpl://auth/callback
+        state:
+          type: string
+          minLength: 1
+          example: st_mock_123
+    LinkExternalIdentityResponse:
+      type: object
+      required:
+        - externalIdentity
+      properties:
+        externalIdentity:
+          $ref: '#/components/schemas/ExternalIdentitySummary'
+    BoardProfileLinkSummary:
+      type: object
+      required:
+        - boardUserId
+        - boardDisplayName
+        - linkedAt
+      properties:
+        boardUserId:
+          type: string
+          example: board_user_abc123
+        boardDisplayName:
+          type: string
+          example: Alex Rivers
+        boardHandle:
+          type: string
+          nullable: true
+          example: alexrivers
+        linkedAt:
+          type: string
+          format: date-time
+        lastSyncedAt:
+          type: string
+          format: date-time
+          nullable: true
+    BoardProfileLinkResponse:
+      type: object
+      required:
+        - boardProfile
+      properties:
+        boardProfile:
+          $ref: '#/components/schemas/BoardProfileLinkSummary'
+    UpsertBoardProfileLinkRequest:
+      type: object
+      required:
+        - boardUserId
+        - boardDisplayName
+      properties:
+        boardUserId:
+          type: string
+          minLength: 1
+          example: board_user_abc123
+        boardDisplayName:
+          type: string
+          minLength: 1
+          example: Alex Rivers
+        boardHandle:
+          type: string
+          nullable: true
+          example: alexrivers
+    AuthTokenPairResponse:
+      type: object
+      required:
+        - tokenType
+        - accessToken
+        - accessTokenExpiresInSeconds
+        - refreshToken
+        - refreshTokenExpiresAt
+        - user
+      properties:
+        tokenType:
+          type: string
+          example: Bearer
+          description: HTTP authorization scheme for the access token.
+        accessToken:
+          type: string
+          example: eyJhbGciOi...mock-access-token
+          description: Bearer access token for authenticated API requests.
+        accessTokenExpiresInSeconds:
+          type: integer
+          format: int32
+          example: 3600
+          description: Access token lifetime in seconds from issuance time.
+        refreshToken:
+          type: string
+          example: rft_mock_1234567890
+          description: >
+            Refresh token used to obtain a new token pair. On refresh, clients should replace any previously
+            stored refresh token with the newly returned token.
+        refreshTokenExpiresAt:
+          type: string
+          format: date-time
+          description: Absolute UTC expiration timestamp for the refresh token.
+        user:
+          $ref: '#/components/schemas/RegisteredUserSummary'
     ProblemDetails:
       type: object
       required:

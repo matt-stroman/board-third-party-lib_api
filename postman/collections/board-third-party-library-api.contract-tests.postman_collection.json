@@ -650,6 +650,655 @@
           ]
         },
         {
+          "name": "Login with email and password",
+          "id": "83c46008-da8e-4d8c-8834-634075464bb1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Bearer and refresh tokens are returned\", function () { pm.expect(json.tokenType).to.eql(\"Bearer\"); pm.expect(json.accessToken).to.be.a(\"string\"); pm.expect(json.refreshToken).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "200",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Login succeeded and tokens were issued.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/auth/login/email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "auth",
+                "login",
+                "email"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"alex@example.com\",\"password\":\"StrongPassword!123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Authenticates with email/password and returns access + refresh tokens."
+          },
+          "response": [
+            {
+              "id": "76b080cd-0563-4dee-87f0-1659ce85d2fc",
+              "name": "Login succeeded and tokens were issued.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex@example.com\",\"password\":\"StrongPassword!123\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/auth/login/email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "auth",
+                    "login",
+                    "email"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"tokenType\":\"Bearer\",\"accessToken\":\"eyJhbGciOi...mock-access-token\",\"accessTokenExpiresInSeconds\":3600,\"refreshToken\":\"rft_mock_1234567890\",\"refreshTokenExpiresAt\":\"2026-03-02T12:00:00Z\",\"user\":{\"id\":\"9d65dc87-c5d2-4a1a-aac0-9414968e8b47\",\"displayName\":\"Alex Rivers\",\"status\":\"active\",\"roles\":[\"player\",\"developer\"]}}"
+            },
+            {
+              "id": "5bb921a0-9325-4a7b-951a-0a7e4dcf554f",
+              "name": "Invalid email/password combination.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/auth/login/email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "auth",
+                    "login",
+                    "email"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex@example.com\",\"password\":\"StrongPassword!123\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/invalid-credentials\",\"title\":\"Invalid credentials\",\"status\":401,\"detail\":\"The email or password is incorrect.\",\"code\":\"invalid_credentials\"}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh authentication tokens",
+          "id": "9b945941-1783-4402-8bf0-8deadd8ebf24",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Rotated tokens are returned\", function () { pm.expect(json.accessToken).to.be.a(\"string\"); pm.expect(json.refreshToken).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "200",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Tokens refreshed successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\":\"rft_mock_1234567890\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Exchanges a refresh token for a new access token pair."
+          },
+          "response": [
+            {
+              "id": "abe41d50-d8b2-4cb5-84d9-63e28b058628",
+              "name": "Tokens refreshed successfully.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"refreshToken\":\"rft_mock_1234567890\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/auth/refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "auth",
+                    "refresh"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"tokenType\":\"Bearer\",\"accessToken\":\"eyJhbGciOi...rotated-access-token\",\"accessTokenExpiresInSeconds\":3600,\"refreshToken\":\"rft_mock_rotated_1234567890\",\"refreshTokenExpiresAt\":\"2026-03-02T13:00:00Z\",\"user\":{\"id\":\"9d65dc87-c5d2-4a1a-aac0-9414968e8b47\",\"displayName\":\"Alex Rivers\",\"status\":\"active\",\"roles\":[\"player\",\"developer\"]}}"
+            },
+            {
+              "id": "9ed78c60-07fc-4bb3-a079-a9a2a8df7f54",
+              "name": "Refresh token is invalid, expired, or revoked.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/auth/refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "auth",
+                    "refresh"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"refreshToken\":\"rft_mock_1234567890\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/invalid-refresh-token\",\"title\":\"Refresh token is invalid or expired\",\"status\":401,\"detail\":\"The refresh token is invalid, expired, or revoked.\",\"code\":\"invalid_refresh_token\"}"
+            }
+          ]
+        },
+        {
+          "name": "Logout current session",
+          "id": "3b1b252a-fcc2-4ab1-99c0-255c4546f716",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "204",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Session logout accepted; tokens revoked where applicable.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "auth",
+                "logout"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\":\"rft_mock_1234567890\",\"scope\":\"current_session\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Revokes the current session and refresh token."
+          },
+          "response": [
+            {
+              "id": "f3896e10-71da-4017-bf13-cc4d13f98cfa",
+              "name": "Session logout accepted; tokens revoked where applicable.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"refreshToken\":\"rft_mock_1234567890\",\"scope\":\"current_session\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "auth",
+                    "logout"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "cookie": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Get current user profile",
+          "id": "d91c1876-90d8-4c93-a20a-011964fce730",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Current user profile shape is returned\", function () { pm.expect(json.user).to.exist; pm.expect(json.primaryEmail).to.exist; pm.expect(json.primaryEmail.isPrimary).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "200",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Current user profile returned successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me"
+              ]
+            },
+            "description": "Returns the authenticated user profile summary."
+          },
+          "response": [
+            {
+              "id": "a8dbd59c-d289-4ea2-a145-65d1d20cff30",
+              "name": "Current user profile returned successfully.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"user\":{\"id\":\"9d65dc87-c5d2-4a1a-aac0-9414968e8b47\",\"displayName\":\"Alex Rivers\",\"status\":\"active\",\"roles\":[\"player\",\"developer\"]},\"primaryEmail\":{\"id\":\"e7fb8793-8443-487b-9bfc-e5ef38145c4a\",\"email\":\"alex@example.com\",\"verified\":true,\"isPrimary\":true,\"status\":\"active\"}}"
+            },
+            {
+              "id": "44d92d45-cdf3-49bf-a996-9fd7eb7838ae",
+              "name": "Missing, invalid, or expired bearer access token.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer access token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "f415b18f-b5e4-4414-86b1-0b61cd9b3fe9",
+              "name": "Authenticated caller is not allowed to perform this action.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"You are not permitted to perform this action.\",\"code\":\"forbidden\"}"
+            },
+            {
+              "id": "2d6b955f-3517-4bb0-9258-7f92a60f8871",
+              "name": "Too many requests for this operation. Retry after the cooldown window.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me"
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Retry-After",
+                  "value": "60"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many requests were made for this operation. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
+            }
+          ]
+        },
+        {
           "name": "List my email addresses",
           "id": "59f8c14f-a7ff-47fd-a548-0771d40830f5",
           "event": [
@@ -2082,6 +2731,2074 @@
               ],
               "cookie": [],
               "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many verification attempts were made. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
+            }
+          ]
+        },
+        {
+          "name": "Change password",
+          "id": "8008159b-2f3f-435d-9237-e2ed6f4468c3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "204",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Password changed successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/password/change",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "password",
+                "change"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Changes the authenticated user password credential."
+          },
+          "response": [
+            {
+              "id": "17ad986d-83fe-481d-9583-b9d58bf605d1",
+              "name": "Password changed successfully.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/password/change",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "password",
+                    "change"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "id": "b902587e-289f-4806-80fe-9e67a46b4739",
+              "name": "Missing, invalid, or expired bearer access token.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/password/change",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "password",
+                    "change"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer access token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "5c577ecc-c426-4db6-83ca-eae39a0dfba6",
+              "name": "Authenticated caller is not allowed to perform this action.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/password/change",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "password",
+                    "change"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}"
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"You are not permitted to perform this action.\",\"code\":\"forbidden\"}"
+            },
+            {
+              "id": "a7c83011-a744-4b86-a875-56209b60ae7e",
+              "name": "Too many requests for this operation. Retry after the cooldown window.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/password/change",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "password",
+                    "change"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}"
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Retry-After",
+                  "value": "60"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many requests were made for this operation. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
+            },
+            {
+              "id": "03c96c00-e32e-4a50-a60a-d9e3ae15382d",
+              "name": "Current password is incorrect.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/password/change",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "password",
+                    "change"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/invalid-current-password\",\"title\":\"Current password is incorrect\",\"status\":409,\"detail\":\"The provided current password does not match the stored credential.\",\"code\":\"invalid_current_password\"}"
+            }
+          ]
+        },
+        {
+          "name": "Request password reset",
+          "id": "0fe8a72f-173a-42c4-9078-aea7b88396ad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 202\", function () { pm.response.to.have.status(202); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Generic accepted response is returned\", function () { pm.expect(json.accepted).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "202",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Password reset request accepted for processing.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/password/forgot",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "password",
+                "forgot"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"alex@example.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Requests a password reset without revealing whether the account exists."
+          },
+          "response": [
+            {
+              "id": "315881d5-564b-4e73-900a-1cf0af7b8eab",
+              "name": "Password reset request accepted for processing.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex@example.com\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/password/forgot",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "password",
+                    "forgot"
+                  ]
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"accepted\":true,\"message\":\"If an account exists for this email address, password reset instructions will be sent.\"}"
+            }
+          ]
+        },
+        {
+          "name": "Reset password with verification token",
+          "id": "7aaea084-b8c8-4afe-924e-0e452ae78acc",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "204",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Password reset successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/password/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "password",
+                "reset"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"alex@example.com\",\"resetToken\":\"prt_mock_482913\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Completes password reset using a reset token/code."
+          },
+          "response": [
+            {
+              "id": "7a44fbfc-19a9-4bf8-bf23-59156a9600ac",
+              "name": "Password reset successfully.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex@example.com\",\"resetToken\":\"prt_mock_482913\",\"newPassword\":\"EvenStrongerPassword!456\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/password/reset",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "password",
+                    "reset"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "id": "ce27b902-c8ce-44e3-acfb-a39717969170",
+              "name": "Reset token is invalid, expired, or already used.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/password/reset",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "password",
+                    "reset"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex@example.com\",\"resetToken\":\"prt_mock_482913\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/password-reset-token-invalid\",\"title\":\"Password reset token is invalid or expired\",\"status\":409,\"detail\":\"The password reset token is invalid, expired, or has already been used.\",\"code\":\"password_reset_token_invalid\"}"
+            }
+          ]
+        },
+        {
+          "name": "List linked external identities",
+          "id": "b5fe03f0-d7f3-48c5-a257-60d5ffef7958",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Linked external identities are returned\", function () { pm.expect(Array.isArray(json.externalIdentities)).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "200",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Linked external identities returned successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "description": "Lists linked external identity providers for the current user."
+          },
+          "response": [
+            {
+              "id": "08ef1925-4160-4a6e-815e-b80451e9ed9a",
+              "name": "Linked external identities returned successfully.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"externalIdentities\":[{\"id\":\"2d405181-c86d-4a9d-a2f7-2d53f6e81630\",\"provider\":\"github\",\"providerUserId\":\"12345678\",\"providerDisplayName\":\"alexrivers\",\"linkedAt\":\"2026-02-23T10:15:00Z\"},{\"id\":\"a2aa9650-88bc-4879-9d7b-435dbb8b4888\",\"provider\":\"steam\",\"providerUserId\":\"76561198000000000\",\"providerDisplayName\":\"AlexRiversSteam\",\"linkedAt\":\"2026-02-23T10:20:00Z\"}]}"
+            },
+            {
+              "id": "69337eee-664b-41c4-b7e6-b4253f06e2ba",
+              "name": "Missing, invalid, or expired bearer access token.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer access token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "8a6469e4-2f05-4ed1-b9f4-7fb053178ca3",
+              "name": "Authenticated caller is not allowed to perform this action.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"You are not permitted to perform this action.\",\"code\":\"forbidden\"}"
+            },
+            {
+              "id": "49b85831-19e5-457f-a9f9-3e846914b5fd",
+              "name": "Too many requests for this operation. Retry after the cooldown window.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Retry-After",
+                  "value": "60"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many requests were made for this operation. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
+            }
+          ]
+        },
+        {
+          "name": "Link external identity",
+          "id": "caad7f6c-85bf-465b-9505-87b427101ea9",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"External identity link is returned\", function () { pm.expect(json.externalIdentity.provider).to.eql(\"github\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "201",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "External identity linked successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Completes linking an external OAuth-style identity provider account."
+          },
+          "response": [
+            {
+              "id": "57d861d3-725c-4b2d-ae41-f309a26c872c",
+              "name": "External identity linked successfully.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"externalIdentity\":{\"id\":\"2d405181-c86d-4a9d-a2f7-2d53f6e81630\",\"provider\":\"github\",\"providerUserId\":\"12345678\",\"providerDisplayName\":\"alexrivers\",\"linkedAt\":\"2026-02-23T10:15:00Z\"}}"
+            },
+            {
+              "id": "5d5a1a5e-17b8-4271-b129-39cf3c71cf9b",
+              "name": "Missing, invalid, or expired bearer access token.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer access token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "04893d7b-f5eb-4baa-8be5-b96a49cf9e02",
+              "name": "Authenticated caller is not allowed to perform this action.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}"
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"You are not permitted to perform this action.\",\"code\":\"forbidden\"}"
+            },
+            {
+              "id": "162c6754-b5f2-459c-9272-68d9d825c4bc",
+              "name": "Too many requests for this operation. Retry after the cooldown window.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}"
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Retry-After",
+                  "value": "60"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many requests were made for this operation. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
+            },
+            {
+              "id": "7a705aaa-b606-46d7-b7f4-5ab7ce7f2ea0",
+              "name": "External identity is already linked to another user or already linked to this user.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/external-identity-already-linked\",\"title\":\"External identity already linked\",\"status\":409,\"detail\":\"This external identity is already linked and cannot be linked again.\",\"code\":\"external_identity_already_linked\"}"
+            }
+          ]
+        },
+        {
+          "name": "Unlink external identity",
+          "id": "fef8c2fa-be34-4814-b58d-96313358a153",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "204",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "External identity unlinked successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities/2d405181-c86d-4a9d-a2f7-2d53f6e81630",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities",
+                "2d405181-c86d-4a9d-a2f7-2d53f6e81630"
+              ]
+            },
+            "description": "Removes a linked external identity from the current user."
+          },
+          "response": [
+            {
+              "id": "f2295171-3e6e-43ba-8c32-7cebdb4f6a89",
+              "name": "External identity unlinked successfully.",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities/2d405181-c86d-4a9d-a2f7-2d53f6e81630",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities",
+                    "2d405181-c86d-4a9d-a2f7-2d53f6e81630"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "id": "16c182d5-a694-4805-bc26-df064699e76f",
+              "name": "Missing, invalid, or expired bearer access token.",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities/2d405181-c86d-4a9d-a2f7-2d53f6e81630",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities",
+                    "2d405181-c86d-4a9d-a2f7-2d53f6e81630"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer access token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "a6832aef-211b-4528-95f7-23df9e782122",
+              "name": "Authenticated caller is not allowed to perform this action.",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities/2d405181-c86d-4a9d-a2f7-2d53f6e81630",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities",
+                    "2d405181-c86d-4a9d-a2f7-2d53f6e81630"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"You are not permitted to perform this action.\",\"code\":\"forbidden\"}"
+            },
+            {
+              "id": "289434eb-453d-4ed4-92ae-b0648e9c7c1b",
+              "name": "Too many requests for this operation. Retry after the cooldown window.",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/external-identities/2d405181-c86d-4a9d-a2f7-2d53f6e81630",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "external-identities",
+                    "2d405181-c86d-4a9d-a2f7-2d53f6e81630"
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Retry-After",
+                  "value": "60"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many requests were made for this operation. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
+            }
+          ]
+        },
+        {
+          "name": "Get linked Board profile",
+          "id": "20763f2a-b847-4597-b791-b3c686a4edad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Board profile link is returned\", function () { pm.expect(json.boardProfile.boardUserId).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "200",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Linked Board profile returned successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Returns the current user Board profile link."
+          },
+          "response": [
+            {
+              "id": "96f26a72-4a93-4077-a4cb-f578ec2ef7c1",
+              "name": "Linked Board profile returned successfully.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"boardProfile\":{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\",\"linkedAt\":\"2026-02-23T10:20:00Z\",\"lastSyncedAt\":\"2026-02-23T11:40:00Z\"}}"
+            },
+            {
+              "id": "36a739fd-aa51-4f4a-bb5e-76d94c902ab0",
+              "name": "Missing, invalid, or expired bearer access token.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer access token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "3c5d873d-1b84-4c56-b573-c2c69efffcbe",
+              "name": "Authenticated caller is not allowed to perform this action.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"You are not permitted to perform this action.\",\"code\":\"forbidden\"}"
+            },
+            {
+              "id": "312288e6-7686-4501-8861-1f73a00a82a0",
+              "name": "Too many requests for this operation. Retry after the cooldown window.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Retry-After",
+                  "value": "60"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many requests were made for this operation. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
+            },
+            {
+              "id": "eb53dab7-c41f-441f-9180-c6c703d04ea1",
+              "name": "No Board profile is linked to the current user.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/board-profile-not-linked\",\"title\":\"Board profile not linked\",\"status\":404,\"detail\":\"No Board profile is linked to the current user.\",\"code\":\"board_profile_not_linked\"}"
+            }
+          ]
+        },
+        {
+          "name": "Link or update Board profile",
+          "id": "0c982fee-57aa-4971-8dd0-4eebe138a433",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Board profile link response shape is returned\", function () { pm.expect(json.boardProfile.boardUserId).to.eql(\"board_user_abc123\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "200",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Board profile linked or updated successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Links or updates the Board profile association for the current user."
+          },
+          "response": [
+            {
+              "id": "04b22b98-a5f3-492d-8c4e-f703ada71a89",
+              "name": "Board profile linked or updated successfully.",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"boardProfile\":{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\",\"linkedAt\":\"2026-02-23T10:20:00Z\",\"lastSyncedAt\":\"2026-02-23T11:40:00Z\"}}"
+            },
+            {
+              "id": "ba241acc-b971-4e2f-a2b2-cf8f617993fa",
+              "name": "Missing, invalid, or expired bearer access token.",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\"}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer access token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "7f164ab7-222c-47ab-9196-66592d0b2747",
+              "name": "Authenticated caller is not allowed to perform this action.",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\"}"
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"You are not permitted to perform this action.\",\"code\":\"forbidden\"}"
+            },
+            {
+              "id": "41ba4b8b-44f0-4ead-97d9-0aaadaba0fcc",
+              "name": "Too many requests for this operation. Retry after the cooldown window.",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\"}"
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Retry-After",
+                  "value": "60"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many requests were made for this operation. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
+            }
+          ]
+        },
+        {
+          "name": "Unlink Board profile",
+          "id": "e03b7c1c-12af-46dd-aa5a-4d2486587fa5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "204",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Board profile unlinked successfully.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Removes the Board profile link for the current user."
+          },
+          "response": [
+            {
+              "id": "094b2c93-f24b-443c-864f-2f46f2ac217e",
+              "name": "Board profile unlinked successfully.",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "id": "33bcc6ee-5ef4-45bb-90d6-9e068b009633",
+              "name": "Missing, invalid, or expired bearer access token.",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer access token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "2387d9d9-b29a-4671-9b6e-19154a705ec9",
+              "name": "Authenticated caller is not allowed to perform this action.",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"You are not permitted to perform this action.\",\"code\":\"forbidden\"}"
+            },
+            {
+              "id": "4671fd64-765e-479d-97f8-932cb09b386d",
+              "name": "Too many requests for this operation. Retry after the cooldown window.",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Retry-After",
+                  "value": "60"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/rate-limit-exceeded\",\"title\":\"Too Many Requests\",\"status\":429,\"detail\":\"Too many requests were made for this operation. Retry after the cooldown period.\",\"code\":\"rate_limit_exceeded\"}"
             }
           ]
         }
@@ -3602,6 +6319,2006 @@
               ]
             },
             "description": "Mock-only request that forces the rate-limited (429) example for make email address primary."
+          },
+          "response": []
+        },
+        {
+          "name": "Get current user profile (Unauthorized 401 example)",
+          "id": "35b09d48-4fc0-4c5c-bc54-5b1034a40367",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"unauthorized\");",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Missing, invalid, or expired bearer access token.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me"
+              ]
+            },
+            "description": "Mock-only request that forces the 401 example for get current user profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Get current user profile (Forbidden 403 example)",
+          "id": "16ec3d8a-5e49-456c-916b-396879cbcd5b",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"forbidden\");",
+                  "  pm.expect(json.status).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "403",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Authenticated caller is not allowed to perform this action.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me"
+              ]
+            },
+            "description": "Mock-only request that forces the 403 example for get current user profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Get current user profile (Rate limited 429 example)",
+          "id": "264f93da-1efb-4a0f-8e39-3f83cff828bf",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"rate_limit_exceeded\");",
+                  "  pm.expect(json.status).to.eql(429);",
+                  "});",
+                  "pm.test(\"Retry-After header is present\", function () { pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "429",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Too many requests for this operation. Retry after the cooldown window.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me"
+              ]
+            },
+            "description": "Mock-only request that forces the 429 example for get current user profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Change password (Unauthorized 401 example)",
+          "id": "95c3c0ac-4466-4e89-9073-9cfe80d98fc2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"unauthorized\");",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Missing, invalid, or expired bearer access token.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/password/change",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "password",
+                "change"
+              ]
+            },
+            "description": "Mock-only request that forces the 401 example for change password.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change password (Forbidden 403 example)",
+          "id": "063eed24-8afa-4770-a6e6-6e16d10570b6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"forbidden\");",
+                  "  pm.expect(json.status).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "403",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Authenticated caller is not allowed to perform this action.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/password/change",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "password",
+                "change"
+              ]
+            },
+            "description": "Mock-only request that forces the 403 example for change password.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change password (Rate limited 429 example)",
+          "id": "0f0885bf-c8b7-442e-b95e-66288df0bb9a",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"rate_limit_exceeded\");",
+                  "  pm.expect(json.status).to.eql(429);",
+                  "});",
+                  "pm.test(\"Retry-After header is present\", function () { pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "429",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Too many requests for this operation. Retry after the cooldown window.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/password/change",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "password",
+                "change"
+              ]
+            },
+            "description": "Mock-only request that forces the 429 example for change password.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List linked external identities (Unauthorized 401 example)",
+          "id": "6a0130b4-6c17-41b8-b1dd-5ae5082c3b97",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"unauthorized\");",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Missing, invalid, or expired bearer access token.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "description": "Mock-only request that forces the 401 example for list linked external identities."
+          },
+          "response": []
+        },
+        {
+          "name": "List linked external identities (Forbidden 403 example)",
+          "id": "77920aff-4312-49ed-a6db-4156e5374b5f",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"forbidden\");",
+                  "  pm.expect(json.status).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "403",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Authenticated caller is not allowed to perform this action.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "description": "Mock-only request that forces the 403 example for list linked external identities."
+          },
+          "response": []
+        },
+        {
+          "name": "List linked external identities (Rate limited 429 example)",
+          "id": "ad329eb6-4ce4-4c15-a3e5-248d1fecaf9e",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"rate_limit_exceeded\");",
+                  "  pm.expect(json.status).to.eql(429);",
+                  "});",
+                  "pm.test(\"Retry-After header is present\", function () { pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "429",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Too many requests for this operation. Retry after the cooldown window.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "description": "Mock-only request that forces the 429 example for list linked external identities."
+          },
+          "response": []
+        },
+        {
+          "name": "Link external identity (Unauthorized 401 example)",
+          "id": "c0ae27ea-735b-4539-919a-21e8cc456100",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"unauthorized\");",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Missing, invalid, or expired bearer access token.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "description": "Mock-only request that forces the 401 example for link external identity.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Link external identity (Forbidden 403 example)",
+          "id": "8832e92e-f67b-403b-88dd-fd2b9a83671e",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"forbidden\");",
+                  "  pm.expect(json.status).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "403",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Authenticated caller is not allowed to perform this action.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "description": "Mock-only request that forces the 403 example for link external identity.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Link external identity (Rate limited 429 example)",
+          "id": "828934b3-78cb-4627-8104-16348812ec5f",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"rate_limit_exceeded\");",
+                  "  pm.expect(json.status).to.eql(429);",
+                  "});",
+                  "pm.test(\"Retry-After header is present\", function () { pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "429",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Too many requests for this operation. Retry after the cooldown window.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "description": "Mock-only request that forces the 429 example for link external identity.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unlink external identity (Unauthorized 401 example)",
+          "id": "e1ce57b5-8112-4538-be84-04544277b46c",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"unauthorized\");",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Missing, invalid, or expired bearer access token.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities/2d405181-c86d-4a9d-a2f7-2d53f6e81630",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities",
+                "2d405181-c86d-4a9d-a2f7-2d53f6e81630"
+              ]
+            },
+            "description": "Mock-only request that forces the 401 example for unlink external identity."
+          },
+          "response": []
+        },
+        {
+          "name": "Unlink external identity (Forbidden 403 example)",
+          "id": "82df126b-38da-48ed-8421-0384ba749052",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"forbidden\");",
+                  "  pm.expect(json.status).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "403",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Authenticated caller is not allowed to perform this action.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities/2d405181-c86d-4a9d-a2f7-2d53f6e81630",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities",
+                "2d405181-c86d-4a9d-a2f7-2d53f6e81630"
+              ]
+            },
+            "description": "Mock-only request that forces the 403 example for unlink external identity."
+          },
+          "response": []
+        },
+        {
+          "name": "Unlink external identity (Rate limited 429 example)",
+          "id": "89c14117-2ee3-4a53-a673-61366a872a3c",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"rate_limit_exceeded\");",
+                  "  pm.expect(json.status).to.eql(429);",
+                  "});",
+                  "pm.test(\"Retry-After header is present\", function () { pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "429",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Too many requests for this operation. Retry after the cooldown window.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities/2d405181-c86d-4a9d-a2f7-2d53f6e81630",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities",
+                "2d405181-c86d-4a9d-a2f7-2d53f6e81630"
+              ]
+            },
+            "description": "Mock-only request that forces the 429 example for unlink external identity."
+          },
+          "response": []
+        },
+        {
+          "name": "Get linked Board profile (Unauthorized 401 example)",
+          "id": "fd405f7f-4f11-4a89-b962-d9882f7d29f2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"unauthorized\");",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Missing, invalid, or expired bearer access token.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 401 example for get linked board profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Get linked Board profile (Forbidden 403 example)",
+          "id": "6e535bc9-6def-4a4c-9f15-2ff4f845c0a1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"forbidden\");",
+                  "  pm.expect(json.status).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "403",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Authenticated caller is not allowed to perform this action.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 403 example for get linked board profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Get linked Board profile (Rate limited 429 example)",
+          "id": "975b380c-d6f4-4ffc-9135-7afb22bf6e99",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"rate_limit_exceeded\");",
+                  "  pm.expect(json.status).to.eql(429);",
+                  "});",
+                  "pm.test(\"Retry-After header is present\", function () { pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "429",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Too many requests for this operation. Retry after the cooldown window.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 429 example for get linked board profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Link or update Board profile (Unauthorized 401 example)",
+          "id": "741a0048-dfc3-4eea-86b9-7fd81bfe2cd0",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"unauthorized\");",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Missing, invalid, or expired bearer access token.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 401 example for link or update board profile.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Link or update Board profile (Forbidden 403 example)",
+          "id": "9e83cbc8-e050-4eb0-ac03-92071e4f8ba4",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"forbidden\");",
+                  "  pm.expect(json.status).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "403",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Authenticated caller is not allowed to perform this action.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 403 example for link or update board profile.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Link or update Board profile (Rate limited 429 example)",
+          "id": "3e05f728-93c2-4c58-8391-0edf69219992",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"rate_limit_exceeded\");",
+                  "  pm.expect(json.status).to.eql(429);",
+                  "});",
+                  "pm.test(\"Retry-After header is present\", function () { pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "429",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Too many requests for this operation. Retry after the cooldown window.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 429 example for link or update board profile.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"boardUserId\":\"board_user_abc123\",\"boardDisplayName\":\"Alex Rivers\",\"boardHandle\":\"alexrivers\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unlink Board profile (Unauthorized 401 example)",
+          "id": "f2e3105c-093e-4d21-977b-f8dde6f01590",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"unauthorized\");",
+                  "  pm.expect(json.status).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Missing, invalid, or expired bearer access token.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 401 example for unlink board profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Unlink Board profile (Forbidden 403 example)",
+          "id": "d0d3331c-12f4-4b3d-adba-2a845310b8cf",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"forbidden\");",
+                  "  pm.expect(json.status).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "403",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Authenticated caller is not allowed to perform this action.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 403 example for unlink board profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Unlink Board profile (Rate limited 429 example)",
+          "id": "d2c3623e-6115-4efb-a391-97ea0f4aaa8c",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"rate_limit_exceeded\");",
+                  "  pm.expect(json.status).to.eql(429);",
+                  "});",
+                  "pm.test(\"Retry-After header is present\", function () { pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "429",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Too many requests for this operation. Retry after the cooldown window.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the 429 example for unlink board profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Login with email and password (Invalid credentials 401 example)",
+          "id": "a9c6d3b0-5420-4f09-9577-908c783c7b0b",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Expected problem code is invalid_credentials\", function () { pm.expect(json.code).to.eql(\"invalid_credentials\"); pm.expect(json.status).to.eql(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Invalid email/password combination.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/auth/login/email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "auth",
+                "login",
+                "email"
+              ]
+            },
+            "description": "Mock-only request that forces the invalid-credentials (401) example for login.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"alex@example.com\",\"password\":\"StrongPassword!123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh authentication tokens (Invalid refresh token 401 example)",
+          "id": "747e7e56-a6eb-4220-b494-77d5e6e82d0e",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Expected problem code is invalid_refresh_token\", function () { pm.expect(json.code).to.eql(\"invalid_refresh_token\"); pm.expect(json.status).to.eql(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "401",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Refresh token is invalid, expired, or revoked.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Mock-only request that forces the invalid-refresh-token (401) example for refresh.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\":\"rft_mock_1234567890\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset password with verification token (Invalid reset token 409 example)",
+          "id": "d71270a4-5a1f-43f9-ad2a-6baeb9b83f98",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Expected problem code is password_reset_token_invalid\", function () { pm.expect(json.code).to.eql(\"password_reset_token_invalid\"); pm.expect(json.status).to.eql(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "409",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Reset token is invalid, expired, or already used.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/password/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "password",
+                "reset"
+              ]
+            },
+            "description": "Mock-only request that forces the invalid password reset token (409) example.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"alex@example.com\",\"resetToken\":\"prt_mock_482913\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change password (Invalid current password 409 example)",
+          "id": "deb38b3f-89a5-4d58-bc22-62ec194c777e",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Expected problem code is invalid_current_password\", function () { pm.expect(json.code).to.eql(\"invalid_current_password\"); pm.expect(json.status).to.eql(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "409",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Current password is incorrect.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/password/change",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "password",
+                "change"
+              ]
+            },
+            "description": "Mock-only request that forces the invalid current password (409) example for change password.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"currentPassword\":\"StrongPassword!123\",\"newPassword\":\"EvenStrongerPassword!456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Link external identity (Already linked 409 example)",
+          "id": "b0871854-02ad-444f-aa75-eb100dae72ab",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Expected problem code is external_identity_already_linked\", function () { pm.expect(json.code).to.eql(\"external_identity_already_linked\"); pm.expect(json.status).to.eql(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "409",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "External identity is already linked to another user or already linked to this user.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/external-identities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "external-identities"
+              ]
+            },
+            "description": "Mock-only request that forces the external-identity-already-linked (409) example.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"provider\":\"github\",\"authorizationCode\":\"gh_oauth_code_mock_123\",\"redirectUri\":\"boardtpl://auth/callback\",\"state\":\"st_mock_123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get linked Board profile (Not linked 404 example)",
+          "id": "86c1cd8c-b857-41b0-8f30-3fd66263673d",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Expected problem code is board_profile_not_linked\", function () { pm.expect(json.code).to.eql(\"board_profile_not_linked\"); pm.expect(json.status).to.eql(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "404",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "No Board profile is linked to the current user.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            },
+            "description": "Mock-only request that forces the board-profile-not-linked (404) example."
           },
           "response": []
         }
