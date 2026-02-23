@@ -220,6 +220,175 @@ paths:
                         - Password must meet minimum complexity requirements.
                       requestedRoleCodes:
                         - At least one platform role must be requested.
+  /identity/me/email-addresses:
+    get:
+      tags: [Identity]
+      summary: List my email addresses
+      description: >
+        Returns the current user's email addresses, including primary/verification status.
+        The authenticated user context is implementation-defined and will be added when auth is implemented.
+      operationId: listMyEmailAddresses
+      responses:
+        '200':
+          description: User email addresses returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEmailAddressListResponse'
+              examples:
+                default:
+                  summary: User with primary and secondary email addresses
+                  value:
+                    emailAddresses:
+                      - id: e7fb8793-8443-487b-9bfc-e5ef38145c4a
+                        email: alex@example.com
+                        verified: true
+                        isPrimary: true
+                        status: active
+                      - id: 489a1540-39f5-499f-a4fd-1874a0136d31
+                        email: alex.rivers@example.com
+                        verified: false
+                        isPrimary: false
+                        status: pending_verification
+    post:
+      tags: [Identity]
+      summary: Add email address
+      description: >
+        Adds a new email address to the current user's account in pending verification status.
+        The email can become primary after verification.
+      operationId: addMyEmailAddress
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddUserEmailAddressRequest'
+            examples:
+              add-secondary:
+                summary: Add a secondary email address
+                value:
+                  email: alex.rivers@example.com
+      responses:
+        '201':
+          description: Email address added and verification is pending.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddUserEmailAddressResponse'
+              examples:
+                created:
+                  summary: Pending verification email address created
+                  value:
+                    emailAddress:
+                      id: 489a1540-39f5-499f-a4fd-1874a0136d31
+                      email: alex.rivers@example.com
+                      verified: false
+                      isPrimary: false
+                      status: pending_verification
+        '409':
+          description: Email address is already in use by another account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                duplicate-email:
+                  summary: Duplicate email address
+                  value:
+                    type: https://boardtpl.dev/problems/duplicate-email
+                    title: Duplicate email address
+                    status: 409
+                    detail: This email address is already associated with another account.
+                    code: duplicate_email
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                invalid-email:
+                  summary: Invalid email address format
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      email:
+                        - A valid email address is required.
+  /identity/me/email-addresses/{emailAddressId}/make-primary:
+    post:
+      tags: [Identity]
+      summary: Make email address primary
+      description: >
+        Sets the specified email address as the current user's primary email address.
+        The target email address must already be verified.
+      operationId: makeMyEmailAddressPrimary
+      parameters:
+        - name: emailAddressId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Primary email address updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEmailAddressListResponse'
+              examples:
+                primary-changed:
+                  summary: Primary email switched to another verified address
+                  value:
+                    emailAddresses:
+                      - id: e7fb8793-8443-487b-9bfc-e5ef38145c4a
+                        email: alex@example.com
+                        verified: true
+                        isPrimary: false
+                        status: active
+                      - id: 489a1540-39f5-499f-a4fd-1874a0136d31
+                        email: alex.rivers@example.com
+                        verified: true
+                        isPrimary: true
+                        status: active
+        '404':
+          description: Email address not found for the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not-found:
+                  summary: Email address ID does not exist for the user
+                  value:
+                    type: https://boardtpl.dev/problems/email-address-not-found
+                    title: Email address not found
+                    status: 404
+                    detail: The requested email address was not found for the current user.
+                    code: email_address_not_found
+        '409':
+          description: Email address cannot be made primary because it is not yet verified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                email-not-verified:
+                  summary: Target email address must be verified before becoming primary
+                  value:
+                    type: https://boardtpl.dev/problems/email-not-verified
+                    title: Email address is not verified
+                    status: 409
+                    detail: Verify this email address before setting it as primary.
+                    code: email_not_verified
 components:
   parameters:
     PostmanMockResponseCodeHeader:
@@ -357,6 +526,15 @@ components:
           example:
             - player
             - developer
+    AddUserEmailAddressRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: alex.rivers@example.com
     RegisteredUserSummary:
       type: object
       required:
@@ -382,14 +560,28 @@ components:
     UserEmailAddressSummary:
       type: object
       required:
+        - id
         - email
         - verified
+        - isPrimary
+        - status
       properties:
+        id:
+          type: string
+          format: uuid
         email:
           type: string
           format: email
         verified:
           type: boolean
+        isPrimary:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - pending_verification
+            - active
+            - retired
     RegisterEmailResponse:
       type: object
       required:
@@ -400,6 +592,22 @@ components:
           $ref: '#/components/schemas/RegisteredUserSummary'
         primaryEmail:
           $ref: '#/components/schemas/UserEmailAddressSummary'
+    AddUserEmailAddressResponse:
+      type: object
+      required:
+        - emailAddress
+      properties:
+        emailAddress:
+          $ref: '#/components/schemas/UserEmailAddressSummary'
+    UserEmailAddressListResponse:
+      type: object
+      required:
+        - emailAddresses
+      properties:
+        emailAddresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserEmailAddressSummary'
     ProblemDetails:
       type: object
       required:

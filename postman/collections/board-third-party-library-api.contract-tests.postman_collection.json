@@ -628,6 +628,370 @@
               "body": "{\n  \"type\": \"https://boardtpl.dev/problems/validation-error\",\n  \"title\": \"Request validation failed\",\n  \"status\": 422,\n  \"code\": \"validation_error\",\n  \"errors\": {\n    \"password\": [\"Password must meet minimum complexity requirements.\"],\n    \"requestedRoleCodes\": [\"At least one platform role must be requested.\"]\n  }\n}"
             }
           ]
+        },
+        {
+          "name": "List my email addresses",
+          "id": "59f8c14f-a7ff-47fd-a548-0771d40830f5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "var emails = Array.isArray(json.emailAddresses) ? json.emailAddresses : [];",
+                  "pm.test(\"Email address list is returned\", function () { pm.expect(emails.length).to.be.greaterThan(0); });",
+                  "pm.test(\"Exactly one primary email exists\", function () {",
+                  "  var primaries = emails.filter(function (e) { return e.isPrimary === true; });",
+                  "  pm.expect(primaries.length).to.eql(1);",
+                  "});",
+                  "pm.test(\"Primary email is verified and active\", function () {",
+                  "  var primary = emails.find(function (e) { return e.isPrimary === true; });",
+                  "  pm.expect(primary.verified).to.eql(true);",
+                  "  pm.expect(primary.status).to.eql(\"active\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/email-addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "email-addresses"
+              ]
+            },
+            "description": "Returns the current user email addresses (primary + verification status)."
+          },
+          "response": [
+            {
+              "id": "47c84b8b-c758-4e2b-95ea-f58111d21f19",
+              "name": "User email addresses returned successfully.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/email-addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "email-addresses"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"emailAddresses\": [\n    {\n      \"id\": \"e7fb8793-8443-487b-9bfc-e5ef38145c4a\",\n      \"email\": \"alex@example.com\",\n      \"verified\": true,\n      \"isPrimary\": true,\n      \"status\": \"active\"\n    },\n    {\n      \"id\": \"489a1540-39f5-499f-a4fd-1874a0136d31\",\n      \"email\": \"alex.rivers@example.com\",\n      \"verified\": false,\n      \"isPrimary\": false,\n      \"status\": \"pending_verification\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add email address",
+          "id": "6570899d-d166-4dac-afd7-61656546376c",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "var req = JSON.parse(pm.request.body.raw);",
+                  "pm.test(\"Pending email address is returned\", function () {",
+                  "  pm.expect(json.emailAddress.email).to.eql(req.email);",
+                  "  pm.expect(json.emailAddress.verified).to.eql(false);",
+                  "  pm.expect(json.emailAddress.isPrimary).to.eql(false);",
+                  "  pm.expect(json.emailAddress.status).to.eql(\"pending_verification\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"alex.rivers@example.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/email-addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "email-addresses"
+              ]
+            },
+            "description": "Adds a new email address to the current user account (pending verification)."
+          },
+          "response": [
+            {
+              "id": "6bc73aa4-7a1b-42d1-ae2a-56d086377886",
+              "name": "Email address added and verification is pending.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex.rivers@example.com\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/email-addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "email-addresses"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"emailAddress\":{\"id\":\"489a1540-39f5-499f-a4fd-1874a0136d31\",\"email\":\"alex.rivers@example.com\",\"verified\":false,\"isPrimary\":false,\"status\":\"pending_verification\"}}"
+            },
+            {
+              "id": "7815b8d6-0b60-43a1-b5c8-add58452e9f2",
+              "name": "Email address is already in use by another account.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex.rivers@example.com\"}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/email-addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "email-addresses"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/duplicate-email\",\"title\":\"Duplicate email address\",\"status\":409,\"detail\":\"This email address is already associated with another account.\",\"code\":\"duplicate_email\"}"
+            }
+          ]
+        },
+        {
+          "name": "Make email address primary",
+          "id": "b494b509-9f87-41c7-ae21-0b660645f2ce",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "var emails = Array.isArray(json.emailAddresses) ? json.emailAddresses : [];",
+                  "pm.test(\"Exactly one primary email exists after update\", function () {",
+                  "  pm.expect(emails.filter(function (e) { return e.isPrimary === true; }).length).to.eql(1);",
+                  "});",
+                  "pm.test(\"Requested email is now primary\", function () {",
+                  "  var primary = emails.find(function (e) { return e.isPrimary === true; });",
+                  "  pm.expect(primary.email).to.eql(\"alex.rivers@example.com\");",
+                  "  pm.expect(primary.verified).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/email-addresses/489a1540-39f5-499f-a4fd-1874a0136d31/make-primary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "email-addresses",
+                "489a1540-39f5-499f-a4fd-1874a0136d31",
+                "make-primary"
+              ]
+            },
+            "description": "Sets a verified email address as the current user primary email."
+          },
+          "response": [
+            {
+              "id": "b7cf86a9-e5ef-40e7-be78-1b000c3e06e9",
+              "name": "Primary email address updated successfully.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/email-addresses/489a1540-39f5-499f-a4fd-1874a0136d31/make-primary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "email-addresses",
+                    "489a1540-39f5-499f-a4fd-1874a0136d31",
+                    "make-primary"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"emailAddresses\": [\n    {\n      \"id\": \"e7fb8793-8443-487b-9bfc-e5ef38145c4a\",\n      \"email\": \"alex@example.com\",\n      \"verified\": true,\n      \"isPrimary\": false,\n      \"status\": \"active\"\n    },\n    {\n      \"id\": \"489a1540-39f5-499f-a4fd-1874a0136d31\",\n      \"email\": \"alex.rivers@example.com\",\n      \"verified\": true,\n      \"isPrimary\": true,\n      \"status\": \"active\"\n    }\n  ]\n}"
+            },
+            {
+              "id": "5a534f63-63b3-434d-9dbb-cbb76bef03fd",
+              "name": "Email address cannot be made primary because it is not yet verified.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/email-addresses/489a1540-39f5-499f-a4fd-1874a0136d31/make-primary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "email-addresses",
+                    "489a1540-39f5-499f-a4fd-1874a0136d31",
+                    "make-primary"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/email-not-verified\",\"title\":\"Email address is not verified\",\"status\":409,\"detail\":\"Verify this email address before setting it as primary.\",\"code\":\"email_not_verified\"}"
+            }
+          ]
         }
       ]
     },
@@ -844,6 +1208,134 @@
               "body": "{\"type\":\"https://boardtpl.dev/problems/duplicate-email\",\"title\":\"Duplicate email address\",\"status\":409,\"detail\":\"An account with this email address already exists.\",\"code\":\"duplicate_email\"}"
             }
           ]
+        },
+        {
+          "name": "Add email address (Duplicate 409 example)",
+          "id": "223cc1de-cf51-4d8b-b7dd-db79adf523f6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Duplicate email problem details are returned\", function () {",
+                  "  pm.expect(json.code).to.eql(\"duplicate_email\");",
+                  "  pm.expect(json.status).to.eql(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "409",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Email address is already in use by another account.",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"alex.rivers@example.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/email-addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "email-addresses"
+              ]
+            },
+            "description": "Mock-only request that forces the duplicate-email (409) example for add email."
+          },
+          "response": []
+        },
+        {
+          "name": "Make email address primary (Unverified 409 example)",
+          "id": "bd031efc-99a9-4e48-aacb-0038b594ddcc",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Response is JSON\", function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Unverified email cannot become primary\", function () {",
+                  "  pm.expect(json.code).to.eql(\"email_not_verified\");",
+                  "  pm.expect(json.status).to.eql(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "409",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Email address cannot be made primary because it is not yet verified.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/email-addresses/489a1540-39f5-499f-a4fd-1874a0136d31/make-primary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "email-addresses",
+                "489a1540-39f5-499f-a4fd-1874a0136d31",
+                "make-primary"
+              ]
+            },
+            "description": "Mock-only request that forces the email-not-verified (409) example for make-primary."
+          },
+          "response": []
         }
       ]
     }
