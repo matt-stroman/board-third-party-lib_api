@@ -240,6 +240,16 @@
               {
                 "key": "Accept",
                 "value": "application/json"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "200",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "API is ready and dependencies are healthy.",
+                "type": "text"
               }
             ],
             "url": {
@@ -472,6 +482,16 @@
               {
                 "key": "Content-Type",
                 "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "201",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Account registered successfully.",
                 "type": "text"
               }
             ],
@@ -753,6 +773,16 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "201",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Email address added and verification is pending.",
+                "type": "text"
               }
             ],
             "body": {
@@ -899,6 +929,16 @@
               {
                 "key": "Accept",
                 "value": "application/json"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "200",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Primary email address updated successfully.",
+                "type": "text"
               }
             ],
             "url": {
