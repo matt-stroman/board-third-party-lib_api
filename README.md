@@ -109,6 +109,21 @@ The contract test collection now includes:
 - `postman/collections/postman-admin.board-third-party-library-mock-provisioning.postman_collection.json`
 - `postman/collections/board-third-party-library-api.contract-tests.postman_collection.json`
 
+### Auth note for `/identity/me/*` contract tests
+
+The Git-tracked contract test collection now sends `Authorization: Bearer {{accessToken}}` for applicable `/identity/me/*` requests (for example email address management and verification endpoints).
+
+Environment variables:
+
+- `Board Third Party Library - Mock` includes a non-secret placeholder `accessToken` (mock runs only need a non-empty value when forcing saved examples).
+- `Board Third Party Library - Local` includes `accessToken` as a placeholder that should be replaced with a real local bearer token once backend auth is implemented.
+
+Security mock validation coverage is included for current `/identity/me/*` endpoints and exercises saved examples for:
+
+- `401 Unauthorized`
+- `403 Forbidden`
+- `429 Too Many Requests`
+
 ### Provision the mock server (code-driven in Postman)
 
 The mock server is provisioned from a Postman **workspace collection object** selected by the Mock Admin environment.
