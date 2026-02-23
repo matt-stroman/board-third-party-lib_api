@@ -330,6 +330,304 @@
       "description": "Service metadata and health endpoints."
     },
     {
+      "name": "Identity & Roles",
+      "description": "Wave 1 identity and platform-role contract tests (API-first; backend implementation pending).",
+      "id": "45bd29b3-0d29-422e-850e-9762321ac1a0",
+      "item": [
+        {
+          "name": "List platform roles",
+          "id": "56030175-301e-4b23-87b9-705c2644d67a",
+          "event": {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "packages": {},
+              "requests": {},
+              "exec": [
+                "pm.test(\"Status code is 200\", function () {",
+                "  pm.response.to.have.status(200);",
+                "});",
+                "pm.test(\"Response is JSON\", function () {",
+                "  pm.response.to.be.json;",
+                "});",
+                "var json = pm.response.json();",
+                "var roles = Array.isArray(json.roles) ? json.roles : [];",
+                "var codes = roles.map(function (r) { return r.code; });",
+                "pm.test(\"Platform roles include core system roles\", function () {",
+                "  [\"player\", \"developer\", \"admin\", \"moderator\"].forEach(function (code) {",
+                "    pm.expect(codes).to.include(code);",
+                "  });",
+                "});",
+                "pm.test(\"All returned roles are platform scoped\", function () {",
+                "  roles.forEach(function (role) { pm.expect(role.scope).to.eql(\"platform\"); });",
+                "});"
+              ]
+            }
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "roles"
+              ]
+            },
+            "description": "Returns global platform roles that can be assigned to users."
+          },
+          "response": [
+            {
+              "id": "f072e815-1cb1-4096-8748-fea525d3cac4",
+              "name": "Platform roles returned successfully.",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/roles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "roles"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"roles\": [\n    { \"code\": \"player\", \"displayName\": \"Player\", \"scope\": \"platform\" },\n    { \"code\": \"developer\", \"displayName\": \"Developer\", \"scope\": \"platform\" },\n    { \"code\": \"admin\", \"displayName\": \"Admin\", \"scope\": \"platform\" },\n    { \"code\": \"moderator\", \"displayName\": \"Moderator\", \"scope\": \"platform\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register account (Email + Password)",
+          "id": "d0d5555c-9602-47f3-9e68-add052c5d03a",
+          "event": {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "packages": {},
+              "requests": {},
+              "exec": [
+                "pm.test(\"Status code is 201\", function () {",
+                "  pm.response.to.have.status(201);",
+                "});",
+                "pm.test(\"Response is JSON\", function () {",
+                "  pm.response.to.be.json;",
+                "});",
+                "var json = pm.response.json();",
+                "var requestBody = JSON.parse(pm.request.body.raw);",
+                "pm.test(\"Registered user shape is returned\", function () {",
+                "  pm.expect(json.user).to.exist;",
+                "  pm.expect(json.user.id).to.be.a(\"string\");",
+                "  pm.expect(json.user.displayName).to.eql(requestBody.displayName);",
+                "  pm.expect(json.user.status).to.eql(\"active\");",
+                "  pm.expect(json.user.roles).to.be.an(\"array\");",
+                "});",
+                "pm.test(\"Primary email matches request\", function () {",
+                "  pm.expect(json.primaryEmail.email).to.eql(requestBody.email);",
+                "  pm.expect(json.primaryEmail.verified).to.eql(false);",
+                "});",
+                "pm.test(\"Requested platform roles are assigned\", function () {",
+                "  requestBody.requestedRoleCodes.forEach(function (roleCode) {",
+                "    pm.expect(json.user.roles).to.include(roleCode);",
+                "  });",
+                "});"
+              ]
+            }
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alex@example.com\",\n  \"password\": \"StrongPassword!123\",\n  \"displayName\": \"Alex Rivers\",\n  \"requestedRoleCodes\": [\"player\", \"developer\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/identity/register/email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "register",
+                "email"
+              ]
+            },
+            "description": "Creates a new account with email/password and requested platform roles."
+          },
+          "response": [
+            {
+              "id": "84ea4692-e671-4b69-b797-73a7695d9842",
+              "name": "Account registered successfully.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex@example.com\",\"password\":\"StrongPassword!123\",\"displayName\":\"Alex Rivers\",\"requestedRoleCodes\":[\"player\",\"developer\"]}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/register/email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "register",
+                    "email"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"user\": {\n    \"id\": \"9d65dc87-c5d2-4a1a-aac0-9414968e8b47\",\n    \"displayName\": \"Alex Rivers\",\n    \"status\": \"active\",\n    \"roles\": [\"player\", \"developer\"]\n  },\n  \"primaryEmail\": {\n    \"email\": \"alex@example.com\",\n    \"verified\": false\n  }\n}"
+            },
+            {
+              "id": "423904b4-9f18-414f-8f29-3ce180d6d29b",
+              "name": "Email address is already registered.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"alex@example.com\",\"password\":\"StrongPassword!123\",\"displayName\":\"Alex Rivers\",\"requestedRoleCodes\":[\"player\",\"developer\"]}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/register/email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "register",
+                    "email"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://boardtpl.dev/problems/duplicate-email\",\n  \"title\": \"Duplicate email address\",\n  \"status\": 409,\n  \"detail\": \"An account with this email address already exists.\",\n  \"code\": \"duplicate_email\"\n}"
+            },
+            {
+              "id": "68722459-90e5-4d46-8171-bbab9709168b",
+              "name": "Validation failed for the request payload.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"not-an-email\",\"password\":\"short\",\"displayName\":\"\",\"requestedRoleCodes\":[]}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/register/email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "register",
+                    "email"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"type\": \"https://boardtpl.dev/problems/validation-error\",\n  \"title\": \"Request validation failed\",\n  \"status\": 422,\n  \"code\": \"validation_error\",\n  \"errors\": {\n    \"password\": [\"Password must meet minimum complexity requirements.\"],\n    \"requestedRoleCodes\": [\"At least one platform role must be requested.\"]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Mock Validation",
       "description": "Requests intended to be run against the Postman mock server to validate example matching and mock responses.",
       "item": [
@@ -429,6 +727,115 @@
               ],
               "cookie": [],
               "body": "{\n  \"status\": \"Unhealthy\",\n  \"checks\": [\n    {\n      \"name\": \"postgres\",\n      \"status\": \"Unhealthy\",\n      \"description\": \"PostgreSQL connection failed.\"\n    }\n  ],\n  \"durationMs\": 12.551\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register account (Duplicate email 409 example)",
+          "id": "e1983e51-e380-499f-ae91-3e9bac0201a5",
+          "event": {
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "packages": {},
+              "requests": {},
+              "exec": [
+                "pm.test(\"Status code is 409\", function () {",
+                "  pm.response.to.have.status(409);",
+                "});",
+                "pm.test(\"Response is JSON\", function () {",
+                "  pm.response.to.be.json;",
+                "});",
+                "var json = pm.response.json();",
+                "pm.test(\"Duplicate email problem details are returned\", function () {",
+                "  pm.expect(json.title).to.eql(\"Duplicate email address\");",
+                "  pm.expect(json.status).to.eql(409);",
+                "  pm.expect(json.code).to.eql(\"duplicate_email\");",
+                "});"
+              ]
+            }
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "409",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "Email address is already registered.",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"alex@example.com\",\"password\":\"StrongPassword!123\",\"displayName\":\"Alex Rivers\",\"requestedRoleCodes\":[\"player\",\"developer\"]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/identity/register/email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "register",
+                "email"
+              ]
+            },
+            "description": "Mock-only request that forces the saved duplicate-email (409) registration example."
+          },
+          "response": [
+            {
+              "id": "d643faa4-3ec8-484b-aabe-2993ebc9564a",
+              "name": "Email address is already registered.",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/register/email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "register",
+                    "email"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/duplicate-email\",\"title\":\"Duplicate email address\",\"status\":409,\"detail\":\"An account with this email address already exists.\",\"code\":\"duplicate_email\"}"
             }
           ]
         }

@@ -4,13 +4,18 @@ info:
   version: 1.0.0-draft
   description: >
     Contract-first API definition for the Board Third Party Library.
-    This initial slice defines service metadata and health endpoints.
+    This initial slice defines service metadata, health endpoints, and the first
+    Wave 1 identity/platform-role endpoints.
 servers:
   - url: http://localhost:5085
     description: Local backend (development)
 tags:
   - name: Health
     description: Service metadata and health endpoints.
+  - name: Identity
+    description: User account registration and identity-related endpoints.
+  - name: PlatformRoles
+    description: Platform-level roles available to users (player, developer, admin, moderator).
 paths:
   /:
     get:
@@ -98,6 +103,117 @@ paths:
                         status: Unhealthy
                         description: PostgreSQL connection failed.
                     durationMs: 12.551
+  /identity/roles:
+    get:
+      tags: [Identity, PlatformRoles]
+      summary: List platform roles
+      description: >
+        Returns the platform-level roles that can be assigned to users. These are global
+        roles (for example player/developer/admin) and are distinct from organization-scoped roles.
+      operationId: listPlatformRoles
+      responses:
+        '200':
+          description: Platform roles returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformRoleListResponse'
+              examples:
+                default:
+                  summary: Default system platform roles
+                  value:
+                    roles:
+                      - code: player
+                        displayName: Player
+                        scope: platform
+                      - code: developer
+                        displayName: Developer
+                        scope: platform
+                      - code: admin
+                        displayName: Admin
+                        scope: platform
+                      - code: moderator
+                        displayName: Moderator
+                        scope: platform
+  /identity/register/email:
+    post:
+      tags: [Identity]
+      summary: Register account with email and password
+      description: >
+        Creates a new user account using email and password authentication and assigns one or more
+        requested platform roles (for example player/developer). Additional OAuth identities may be linked later.
+      operationId: registerUserWithEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterEmailRequest'
+            examples:
+              player-and-developer:
+                summary: Register a combined player/developer account
+                value:
+                  email: alex@example.com
+                  password: StrongPassword!123
+                  displayName: Alex Rivers
+                  requestedRoleCodes:
+                    - player
+                    - developer
+      responses:
+        '201':
+          description: Account registered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterEmailResponse'
+              examples:
+                created:
+                  summary: Newly registered user account
+                  value:
+                    user:
+                      id: 9d65dc87-c5d2-4a1a-aac0-9414968e8b47
+                      displayName: Alex Rivers
+                      status: active
+                      roles:
+                        - player
+                        - developer
+                    primaryEmail:
+                      email: alex@example.com
+                      verified: false
+        '409':
+          description: Email address is already registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                duplicate-email:
+                  summary: Duplicate email address
+                  value:
+                    type: https://boardtpl.dev/problems/duplicate-email
+                    title: Duplicate email address
+                    status: 409
+                    detail: An account with this email address already exists.
+                    code: duplicate_email
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                invalid-request:
+                  summary: Password too short and missing role
+                  value:
+                    type: https://boardtpl.dev/problems/validation-error
+                    title: Request validation failed
+                    status: 422
+                    code: validation_error
+                    errors:
+                      password:
+                        - Password must meet minimum complexity requirements.
+                      requestedRoleCodes:
+                        - At least one platform role must be requested.
 components:
   schemas:
     ApiMetadataResponse:
@@ -160,3 +276,136 @@ components:
           type: object
           nullable: true
           additionalProperties: true
+    PlatformRoleSummary:
+      type: object
+      required:
+        - code
+        - displayName
+        - scope
+      properties:
+        code:
+          type: string
+          example: developer
+        displayName:
+          type: string
+          example: Developer
+        scope:
+          type: string
+          enum:
+            - platform
+    PlatformRoleListResponse:
+      type: object
+      required:
+        - roles
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformRoleSummary'
+    RegisterEmailRequest:
+      type: object
+      required:
+        - email
+        - password
+        - displayName
+        - requestedRoleCodes
+      properties:
+        email:
+          type: string
+          format: email
+          example: alex@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: StrongPassword!123
+        displayName:
+          type: string
+          minLength: 1
+          example: Alex Rivers
+        requestedRoleCodes:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            example: player
+          example:
+            - player
+            - developer
+    RegisteredUserSummary:
+      type: object
+      required:
+        - id
+        - displayName
+        - status
+        - roles
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        status:
+          type: string
+          enum:
+            - active
+            - disabled
+        roles:
+          type: array
+          items:
+            type: string
+    UserEmailAddressSummary:
+      type: object
+      required:
+        - email
+        - verified
+      properties:
+        email:
+          type: string
+          format: email
+        verified:
+          type: boolean
+    RegisterEmailResponse:
+      type: object
+      required:
+        - user
+        - primaryEmail
+      properties:
+        user:
+          $ref: '#/components/schemas/RegisteredUserSummary'
+        primaryEmail:
+          $ref: '#/components/schemas/UserEmailAddressSummary'
+    ProblemDetails:
+      type: object
+      required:
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+          nullable: true
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+          nullable: true
+        code:
+          type: string
+          nullable: true
+    ValidationProblemDetails:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          required:
+            - errors
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
