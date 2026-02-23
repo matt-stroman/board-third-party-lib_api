@@ -17,6 +17,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "(async function () {",
                   "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
                   "var payload = pm.response.json();",
                   "var collections = (payload && payload.collections) || [];",
@@ -42,7 +43,19 @@
                   "if (!target || !target.uid) { return; }",
                   "pm.environment.set(\"contractTestsCollectionUid\", target.uid);",
                   "var apiBase = pm.environment.get(\"postmanApiBaseUrl\") || \"https://api.getpostman.com\";",
-                  "var apiKey = pm.variables.replaceIn(\"{{vault:postman-api-key}}\");",
+                  "var apiKey = null;",
+                  "try {",
+                  "  apiKey = await pm.vault.get(\"postman-api-key\");",
+                  "} catch (vaultErr) {",
+                  "  pm.test(\"Vault secret postman-api-key is accessible to scripts\", function () {",
+                  "    pm.expect.fail(\"Enable Postman Vault support in scripts and grant this collection/workspace access to vault secrets.\");",
+                  "  });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Vault secret postman-api-key resolved for script requests\", function () {",
+                  "  pm.expect(apiKey).to.be.a(\"string\");",
+                  "  pm.expect(apiKey.length).to.be.above(0);",
+                  "});",
                   "var workspaceId = pm.environment.get(\"workspaceId\");",
                   "var mockServerName = pm.environment.get(\"mockServerName\");",
                   "var runtimeEnvName = pm.environment.get(\"mockRuntimeEnvironmentName\") || \"Board Third Party Library - Mock\";",
@@ -180,7 +193,8 @@
                   "  }",
                   "",
                   "  syncRuntimeEnvBaseUrl(mockUrl);",
-                  "});"
+                  "});",
+                  "})();"
                 ]
               }
             }

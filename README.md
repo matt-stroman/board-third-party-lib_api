@@ -64,15 +64,16 @@ The contract test collection now includes:
    - `Board Third Party Library - Mock Admin` (mock provisioning/maintenance)
 2. Select `Board Third Party Library - Mock Admin`.
 3. Add your Postman API key to **Postman Vault** as `postman-api-key` (local secret), so the admin collection can use `{{vault:postman-api-key}}`.
-4. Run `Postman Admin - Board Third Party Library Mock Provisioning`:
+4. Enable Vault access for scripts (one-time Postman setup) and grant this collection/workspace access when prompted.
+5. Run `Postman Admin - Board Third Party Library Mock Provisioning`:
    - `Collections / Provision/refresh mock server (one-step)`
-5. The collection test scripts will populate in the **Mock Admin** environment:
+6. The collection test scripts will populate in the **Mock Admin** environment:
    - `contractTestsCollectionUid`
    - `mockId`
    - `mockUrl`
    - `baseUrl` (set to the created mock URL)
-6. The one-step admin request will also attempt to automatically sync `Board Third Party Library - Mock` `baseUrl` via the Postman API using `mockRuntimeEnvironmentId` (or resolve the runtime environment ID by name if it is blank).
-7. Run `Board Third Party Library API (Contract Tests)` against `Board Third Party Library - Mock`.
+7. The one-step admin request will also attempt to automatically sync `Board Third Party Library - Mock` `baseUrl` via the Postman API using `mockRuntimeEnvironmentId` (or resolve the runtime environment ID by name if it is blank).
+8. Run `Board Third Party Library API (Contract Tests)` against `Board Third Party Library - Mock`.
 
 ### If runtime Mock environment auto-sync fails
 
