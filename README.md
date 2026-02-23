@@ -59,21 +59,31 @@ The contract test collection now includes:
 
 ### Provision the mock server (code-driven in Postman)
 
+The mock server is provisioned from the **API Builder generated collection** (workspace object), not the Git-tracked Contract Tests collection. This avoids false failures caused by a stale Postman workspace copy of the Contract Tests collection when the repo file is newer.
+
+The Mock Admin environment controls which workspace collection is used as the mock source:
+
+- `mockSourceCollectionName` (default: `Board Third Party Library API (Generated)`)
+- `mockSourceCollectionPostmanId` (optional exact Postman collection ID override if duplicate generated collections exist)
+
 1. In Postman, import/sync both environments:
    - `Board Third Party Library - Mock` (day-to-day contract test runs)
    - `Board Third Party Library - Mock Admin` (mock provisioning/maintenance)
 2. Select `Board Third Party Library - Mock Admin`.
 3. Add your Postman API key to **Postman Vault** as `postman-api-key` (local secret), so the admin collection can use `{{vault:postman-api-key}}`.
 4. Enable Vault access for scripts (one-time Postman setup) and grant this collection/workspace access when prompted.
-5. Run `Postman Admin - Board Third Party Library Mock Provisioning`:
+5. If the OpenAPI spec changed, regenerate the API Builder generated collection first (so the mock source collection is current).
+6. Run `Postman Admin - Board Third Party Library Mock Provisioning`:
    - `Collections / Provision/refresh mock server (one-step)`
-6. The collection test scripts will populate in the **Mock Admin** environment:
-   - `contractTestsCollectionUid`
+7. The collection test scripts will populate in the **Mock Admin** environment:
+   - `mockSourceCollectionUid`
    - `mockId`
    - `mockUrl`
    - `baseUrl` (set to the created mock URL)
-7. The one-step admin request will also attempt to automatically sync `Board Third Party Library - Mock` `baseUrl` via the Postman API using `mockRuntimeEnvironmentId` (or resolve the runtime environment ID by name if it is blank).
-8. Run `Board Third Party Library API (Contract Tests)` against `Board Third Party Library - Mock`.
+8. The one-step admin request will also attempt to automatically sync `Board Third Party Library - Mock` `baseUrl` via the Postman API using `mockRuntimeEnvironmentId` (or resolve the runtime environment ID by name if it is blank).
+9. Run `Board Third Party Library API (Contract Tests)` against `Board Third Party Library - Mock`.
+
+The one-step provisioning request now performs a preflight validation of the resolved mock source collection snapshot (route presence + saved examples for currently required endpoints). If it fails, fix the generated collection/workspace object first instead of trusting mock-based contract test failures.
 
 ### If runtime Mock environment auto-sync fails
 
@@ -90,7 +100,7 @@ Optional manual fallback:
 
 These values are intentionally blank in the versioned **Mock Admin** environment template and are populated by the Postman admin provisioning collection after you run it:
 
-- `contractTestsCollectionUid`
+- `mockSourceCollectionUid`
 - `mockId`
 - `mockUrl`
 

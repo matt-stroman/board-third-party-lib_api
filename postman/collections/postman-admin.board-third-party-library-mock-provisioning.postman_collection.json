@@ -21,27 +21,32 @@
                   "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
                   "var payload = pm.response.json();",
                   "var collections = (payload && payload.collections) || [];",
-                  "var targetName = pm.environment.get(\"contractTestsCollectionName\");",
-                  "var targetPostmanId = pm.environment.get(\"contractTestsCollectionPostmanId\");",
+                  "var targetName = pm.environment.get(\"mockSourceCollectionName\");",
+                  "var targetPostmanId = pm.environment.get(\"mockSourceCollectionPostmanId\");",
                   "var exactTarget = targetPostmanId ? collections.find(function (c) {",
                   "  return c && c.uid && c.uid.split(\"-\").slice(1).join(\"-\") === targetPostmanId;",
                   "}) : null;",
                   "var fallbackTarget = collections.find(function (c) { return c && c.name === targetName; });",
+                  "var matchingByName = collections.filter(function (c) { return c && c.name === targetName; });",
+                  "pm.test(\"Mock source collection name resolves to exactly one workspace collection when no Postman ID is configured\", function () {",
+                  "  if (targetPostmanId) { pm.expect(true).to.eql(true); return; }",
+                  "  pm.expect(matchingByName.length, \"Found \" + matchingByName.length + \" collections named \" + targetName + \". Clean up duplicates or set mockSourceCollectionPostmanId.\").to.eql(1);",
+                  "});",
                   "var target = exactTarget || fallbackTarget;",
-                  "pm.test(\"Contract Tests collection exists\", function () {",
+                  "pm.test(\"Mock source collection exists\", function () {",
                   "  pm.expect(target, \"Collection not found: \" + targetName).to.exist;",
                   "});",
-                  "pm.test(\"Resolved expected Contract Tests collection Postman ID when configured\", function () {",
+                  "pm.test(\"Resolved expected Mock source collection Postman ID when configured\", function () {",
                   "  if (!targetPostmanId) { pm.expect(true).to.eql(true); return; }",
                   "  pm.expect(exactTarget, \"Expected collection Postman ID not found: \" + targetPostmanId).to.exist;",
                   "});",
                   "if (target && target.uid && targetPostmanId && !exactTarget) {",
-                  "  pm.environment.set(\"contractTestsCollectionResolutionWarning\", \"Name match used; exact Postman ID not found at \" + new Date().toISOString());",
+                  "  pm.environment.set(\"mockSourceCollectionResolutionWarning\", \"Name match used; exact Postman ID not found at \" + new Date().toISOString());",
                   "} else {",
-                  "  pm.environment.unset(\"contractTestsCollectionResolutionWarning\");",
+                  "  pm.environment.unset(\"mockSourceCollectionResolutionWarning\");",
                   "}",
                   "if (!target || !target.uid) { return; }",
-                  "pm.environment.set(\"contractTestsCollectionUid\", target.uid);",
+                  "pm.environment.set(\"mockSourceCollectionUid\", target.uid);",
                   "var apiBase = pm.environment.get(\"postmanApiBaseUrl\") || \"https://api.getpostman.com\";",
                   "var apiKey = null;",
                   "try {",
@@ -216,7 +221,7 @@
                   "  method: \"GET\",",
                   "  header: { \"X-Api-Key\": apiKey, \"Accept\": \"application/json\" }",
                   "}, function (detailErr, detailRes) {",
-                  "  pm.test(\"Fetched resolved Contract Tests collection details\", function () {",
+                  "  pm.test(\"Fetched resolved Mock source collection details\", function () {",
                   "    pm.expect(detailErr).to.eql(null);",
                   "    pm.expect(detailRes).to.exist;",
                   "    pm.expect(detailRes.code).to.eql(200);",
@@ -225,7 +230,7 @@
                   "",
                   "  var detailPayload = detailRes.json();",
                   "  var collectionObj = detailPayload && detailPayload.collection;",
-                  "  pm.test(\"Resolved Contract Tests collection payload returned\", function () {",
+                  "  pm.test(\"Resolved Mock source collection payload returned\", function () {",
                   "    pm.expect(collectionObj).to.exist;",
                   "    pm.expect(Array.isArray(collectionObj.item)).to.eql(true);",
                   "  });",
@@ -236,16 +241,16 @@
                   "  var addEmailReq = requests.find(function (r) { return r && r.request && r.request.method === \"POST\" && requestPathRaw(r).indexOf(\"/identity/me/email-addresses\") >= 0 && requestPathRaw(r).indexOf(\"make-primary\") < 0; });",
                   "  var makePrimaryReq = requests.find(function (r) { return r && r.request && r.request.method === \"POST\" && requestPathRaw(r).indexOf(\"/identity/me/email-addresses/\") >= 0 && requestPathRaw(r).indexOf(\"/make-primary\") >= 0; });",
                   "",
-                  "  pm.test(\"Resolved Contract Tests collection contains email management routes\", function () {",
-                  "    pm.expect(listEmailsReq, \"Missing GET /identity/me/email-addresses in resolved collection snapshot\").to.exist;",
-                  "    pm.expect(addEmailReq, \"Missing POST /identity/me/email-addresses in resolved collection snapshot\").to.exist;",
-                  "    pm.expect(makePrimaryReq, \"Missing POST /identity/me/email-addresses/{id}/make-primary in resolved collection snapshot\").to.exist;",
+                  "  pm.test(\"Resolved Mock source collection contains email management routes\", function () {",
+                  "    pm.expect(listEmailsReq, \"Missing GET /identity/me/email-addresses in resolved mock source collection snapshot (regenerate API Builder generated collection and retry)\").to.exist;",
+                  "    pm.expect(addEmailReq, \"Missing POST /identity/me/email-addresses in resolved mock source collection snapshot (regenerate API Builder generated collection and retry)\").to.exist;",
+                  "    pm.expect(makePrimaryReq, \"Missing POST /identity/me/email-addresses/{id}/make-primary in resolved mock source collection snapshot (regenerate API Builder generated collection and retry)\").to.exist;",
                   "  });",
                   "",
-                  "  pm.test(\"Resolved Contract Tests collection contains saved mock responses for email routes\", function () {",
-                  "    pm.expect(Array.isArray(listEmailsReq && listEmailsReq.response) && listEmailsReq.response.length > 0, \"No saved examples on GET /identity/me/email-addresses\").to.eql(true);",
-                  "    pm.expect(Array.isArray(addEmailReq && addEmailReq.response) && addEmailReq.response.length > 0, \"No saved examples on POST /identity/me/email-addresses\").to.eql(true);",
-                  "    pm.expect(Array.isArray(makePrimaryReq && makePrimaryReq.response) && makePrimaryReq.response.length > 0, \"No saved examples on POST /identity/me/email-addresses/{id}/make-primary\").to.eql(true);",
+                  "  pm.test(\"Resolved Mock source collection contains saved mock responses for email routes\", function () {",
+                  "    pm.expect(Array.isArray(listEmailsReq && listEmailsReq.response) && listEmailsReq.response.length > 0, \"No saved examples on GET /identity/me/email-addresses in resolved mock source collection (regenerate API Builder generated collection and retry)\").to.eql(true);",
+                  "    pm.expect(Array.isArray(addEmailReq && addEmailReq.response) && addEmailReq.response.length > 0, \"No saved examples on POST /identity/me/email-addresses in resolved mock source collection (regenerate API Builder generated collection and retry)\").to.eql(true);",
+                  "    pm.expect(Array.isArray(makePrimaryReq && makePrimaryReq.response) && makePrimaryReq.response.length > 0, \"No saved examples on POST /identity/me/email-addresses/{id}/make-primary in resolved mock source collection (regenerate API Builder generated collection and retry)\").to.eql(true);",
                   "  });",
                   "",
                   "  createMockFromResolvedCollection();",
@@ -282,7 +287,7 @@
                 "collections"
               ]
             },
-            "description": "One-step admin request that resolves the Contract Tests collection UID, creates a new mock server from it, stores mockId/mockUrl, and attempts to auto-sync the Board Third Party Library - Mock environment baseUrl. Use the Board Third Party Library - Mock Admin environment."
+            "description": "One-step admin request that resolves the mock source collection UID (default: API Builder generated collection), validates the resolved collection snapshot contains expected routes/examples, creates a new mock server from it, stores mockId/mockUrl, and attempts to auto-sync the Board Third Party Library - Mock environment baseUrl. Use the Board Third Party Library - Mock Admin environment."
           },
           "response": []
         }
@@ -419,7 +424,7 @@
                 }
               ]
             },
-            "description": "Creates a mock server from the Git-tracked Contract Tests collection. Run the collection lookup first. Use the Board Third Party Library - Mock Admin environment."
+            "description": "Legacy/manual helper that creates a mock server from the Git-tracked Contract Tests collection using mockSourceCollectionUid/contractTestsCollectionUid already set in the environment. Prefer the one-step provisioning request in Collections."
           },
           "response": []
         },
@@ -616,3 +621,4 @@
     }
   ]
 }
+
