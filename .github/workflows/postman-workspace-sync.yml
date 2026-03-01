@@ -16,6 +16,7 @@ concurrency:
 env:
   COLLECTION_PATH: postman/collections/board-third-party-library-api.contract-tests.postman_collection.json
   ADMIN_ENVIRONMENT_PATH: postman/environments/board-third-party-library_mock-admin.postman_environment.json
+  POSTMAN_CLI_VERSION: 1.29.5
 
 jobs:
   sync-workspace:
@@ -27,13 +28,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Push Native Git workspace artifacts
-        uses: postmanlabs/postman-cli-action@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          api-key: ${{ secrets.POSTMAN_API_KEY }}
-          postman-cli-version: 1.29.5
-          working-directory: .
-          command: workspace push --yes
+          node-version: 20
+
+      - name: Install Postman CLI
+        run: npm install -g postman-cli@${POSTMAN_CLI_VERSION}
+
+      - name: Authenticate Postman CLI
+        env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+          POSTMAN_REGION: ${{ vars.POSTMAN_REGION }}
+        run: |
+          REGION_ARGS=()
+          if [ -n "${POSTMAN_REGION}" ]; then
+            REGION_ARGS+=(--region "${POSTMAN_REGION}")
+          fi
+
+          postman login --with-api-key "${POSTMAN_API_KEY}" "${REGION_ARGS[@]}"
+
+      - name: Push Native Git workspace artifacts
+        run: |
+          for attempt in 1 2 3 4; do
+            echo "Workspace push attempt ${attempt}/4"
+
+            if postman workspace push --yes; then
+              exit 0
+            fi
+
+            if [ "${attempt}" -eq 4 ]; then
+              echo "Workspace push failed after 4 attempts." >&2
+              exit 1
+            fi
+
+            sleep $((attempt * 5))
+          done
 
       - name: Reprovision shared mock server
         id: provision_shared_mock
@@ -46,17 +76,14 @@ jobs:
             --mode shared
 
       - name: Validate synced mock with Postman CLI
-        uses: postmanlabs/postman-cli-action@v1
-        with:
-          postman-cli-version: 1.29.5
-          working-directory: .
-          command: >-
-            collection run postman/collections/board-third-party-library-api.contract-tests.postman_collection.json
-            --environment postman/environments/board-third-party-library_mock.postman_environment.json
-            --env-var baseUrl=${{ steps.provision_shared_mock.outputs.base_url }}
-            --env-var contractExecutionMode=mock
-            --bail failure
-            --reporters cli,junit
+        run: |
+          mkdir -p postman-cli-reports
+          postman collection run postman/collections/board-third-party-library-api.contract-tests.postman_collection.json \
+            --environment postman/environments/board-third-party-library_mock.postman_environment.json \
+            --env-var baseUrl=${{ steps.provision_shared_mock.outputs.base_url }} \
+            --env-var contractExecutionMode=mock \
+            --bail failure \
+            --reporters cli,junit \
             --reporter-junit-export postman-cli-reports/workspace-sync-results.xml
 
       - name: Upload Postman CLI sync report
