@@ -146,7 +146,7 @@ paths:
                     accountManagementUrl: http://localhost:8080/realms/board-third-party-library/account
                     clientId: board-third-party-library-backend
                     callbackUrl: http://localhost:5085/identity/auth/callback
-                    scopes: [openid, profile, email, offline_access]
+                    scopes: [openid, profile, email]
                     registrationEnabled: true
                     externalIdentityProviders: []
   /identity/auth/login:
@@ -171,7 +171,7 @@ paths:
               schema:
                 type: string
                 format: uri
-              example: http://localhost:8080/realms/board-third-party-library/protocol/openid-connect/auth?client_id=board-third-party-library-backend&redirect_uri=http%3A%2F%2Flocalhost%3A5085%2Fidentity%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email%20offline_access&state=st_mock_123&code_challenge=pkce_mock_123&code_challenge_method=S256
+              example: http://localhost:8080/realms/board-third-party-library/protocol/openid-connect/auth?client_id=board-third-party-library-backend&redirect_uri=http%3A%2F%2Flocalhost%3A5085%2Fidentity%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email&state=st_mock_123&code_challenge=pkce_mock_123&code_challenge_method=S256
   /identity/auth/callback:
     get:
       tags: [Identity]
@@ -211,7 +211,7 @@ paths:
                     idToken: eyJhbGciOi...mock-id-token
                     tokenType: Bearer
                     expiresInSeconds: 300
-                    scope: openid profile email offline_access
+                    scope: openid profile email
                     user:
                       subject: 5cfdbb44-2cf9-4aa2-b411-6c25b6690c4c
                       displayName: Local Admin

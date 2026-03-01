@@ -115,14 +115,27 @@ The contract test collection now includes:
 
 The Git-tracked contract test collection sends `Authorization: Bearer {{accessToken}}` for authenticated `/identity/me/*` requests.
 
+The collection now supports two execution modes:
+
+- `mock`: assert saved example responses and run the `Mock Validation` folder
+- `live`: run portable smoke assertions by default, and only run auth-success assertions when you provide real auth artifacts in the environment
+
 Environment variables:
 
 - `Board Third Party Library - Mock` includes a non-secret placeholder `accessToken` (mock runs only need a non-empty value when forcing saved examples).
-- `Board Third Party Library - Local` includes `accessToken` as a placeholder that should be replaced with a real Keycloak-issued local bearer token.
+- `Board Third Party Library - Mock` also includes `authCallbackCode` / `authCallbackState` values used by the saved callback example.
+- `Board Third Party Library - Local` includes `accessToken`, `authCallbackCode`, and `authCallbackState` placeholders that should be replaced with real values if you want to exercise the authenticated success-path requests against a live backend.
 
 Security mock validation coverage is included for the current authenticated identity endpoints and exercises saved examples for:
 
 - `401 Unauthorized`
+
+Important:
+
+- The same collection can be run against mock, local, or remote environments, but not every request can assert the same thing in every environment.
+- Mock-only example-selection requests are skipped automatically outside `mock` mode.
+- Live auth-success requests are skipped automatically unless you provide a real bearer token and, for callback-success verification, a real authorization `code` and `state`.
+- If a live environment still fails after those prerequisites are provided, that is a real backend contract gap rather than a Postman-environment issue.
 
 ### Wave 1 auth semantics (contract guidance)
 
