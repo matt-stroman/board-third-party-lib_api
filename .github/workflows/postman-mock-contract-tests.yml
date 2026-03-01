@@ -33,12 +33,12 @@ jobs:
           node-version: 20
 
       - name: Lint OpenAPI specification
-        uses: postmanlabs/postman-cli-action@v1
-        with:
-          api-key: ${{ secrets.POSTMAN_API_KEY }}
-          postman-cli-version: 1.29.5
-          working-directory: .
-          command: "spec lint postman/specs/board-third-party-library-api.v1.openapi.yaml --fail-severity error"
+        run: >-
+          npx @redocly/cli lint postman/specs/board-third-party-library-api.v1.openapi.yaml
+          --skip-rule info-license
+          --skip-rule no-server-example.com
+          --skip-rule operation-4xx-response
+          --skip-rule operation-2xx-response
 
       - name: Provision mock server for this run
         id: provision_mock

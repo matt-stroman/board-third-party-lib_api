@@ -27,6 +27,7 @@ paths:
       tags: [Health]
       summary: Get API metadata
       operationId: getApiMetadata
+      security: []
       responses:
         '200':
           description: API metadata returned successfully.
@@ -44,6 +45,7 @@ paths:
       tags: [Health]
       summary: Liveness health check
       operationId: getLivenessHealth
+      security: []
       responses:
         '200':
           description: API process is alive.
@@ -62,6 +64,7 @@ paths:
       tags: [Health]
       summary: Readiness health check
       operationId: getReadinessHealth
+      security: []
       parameters:
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
@@ -104,6 +107,7 @@ paths:
       tags: [PlatformRoles]
       summary: List platform roles
       operationId: listPlatformRoles
+      security: []
       responses:
         '200':
           description: Platform roles returned successfully.
@@ -132,6 +136,7 @@ paths:
       tags: [Identity]
       summary: Get authentication configuration
       operationId: getAuthenticationConfiguration
+      security: []
       responses:
         '200':
           description: Keycloak/OpenID Connect configuration returned successfully.
@@ -158,6 +163,7 @@ paths:
       tags: [Identity]
       summary: Start browser login with Keycloak
       operationId: startBrowserLogin
+      security: []
       parameters:
         - name: provider
           in: query
@@ -181,6 +187,7 @@ paths:
       tags: [Identity]
       summary: Complete browser login callback
       operationId: completeBrowserLoginCallback
+      security: []
       parameters:
         - name: code
           in: query
@@ -398,6 +405,7 @@ paths:
       tags: [Organizations]
       summary: List public organizations
       operationId: listOrganizations
+      security: []
       responses:
         '200':
           description: Public organizations returned successfully.
@@ -497,6 +505,7 @@ paths:
       tags: [Organizations]
       summary: Get public organization details
       operationId: getOrganizationBySlug
+      security: []
       parameters:
         - name: slug
           in: path
