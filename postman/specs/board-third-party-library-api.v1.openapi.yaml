@@ -801,6 +801,9 @@ paths:
     get:
       tags: [Catalog]
       summary: List public catalog titles
+      description: >
+        Returns publicly discoverable titles. Only `listed` titles in the
+        `testing` or `published` lifecycle states appear in this collection.
       operationId: listCatalogTitles
       security: []
       parameters:
@@ -849,6 +852,9 @@ paths:
     get:
       tags: [Catalog]
       summary: Get public catalog title details
+      description: >
+        Returns a single public title by storefront route keys. `unlisted`
+        titles remain reachable here, while `private` titles do not.
       operationId: getCatalogTitle
       security: []
       parameters:
@@ -1131,6 +1137,10 @@ paths:
     put:
       tags: [Catalog]
       summary: Update current title metadata
+      description: >
+        Updates the current metadata revision while a title is still `draft`.
+        Once the title has left draft, this operation preserves history by
+        creating a new metadata revision and activating it.
       operationId: upsertCurrentTitleMetadata
       security:
         - BearerAuth: []
@@ -1237,6 +1247,9 @@ paths:
     post:
       tags: [Catalog]
       summary: Activate metadata revision
+      description: >
+        Reactivates an existing metadata revision for the title. This supports
+        rollback to an earlier catalog snapshot.
       operationId: activateTitleMetadataVersion
       security:
         - BearerAuth: []
@@ -1582,40 +1595,60 @@ components:
           type: string
     TitleContentKind:
       type: string
+      description: Stable type classification for a title.
       enum: [game, app]
     TitleLifecycleStatus:
       type: string
+      description: >
+        Catalog lifecycle state. Draft titles are developer-only, testing
+        titles support controlled public exposure, published titles are
+        officially public, and archived titles are no longer active.
       enum: [draft, testing, published, archived]
     TitleVisibility:
       type: string
+      description: >
+        Public discoverability mode independent of lifecycle state. `listed`
+        titles appear in browse results, `unlisted` titles are direct-link
+        only, and `private` titles are not publicly reachable.
       enum: [private, unlisted, listed]
     TitleMetadataInput:
       type: object
+      description: Player-facing metadata payload for a title revision.
       required: [displayName, shortDescription, description, genreDisplay, minPlayers, maxPlayers, ageRatingAuthority, ageRatingValue, minAgeYears]
       properties:
         displayName:
           type: string
+          description: Public display name for the title.
         shortDescription:
           type: string
+          description: Short catalog summary suitable for cards and lists.
         description:
           type: string
+          description: Full catalog description.
         genreDisplay:
           type: string
+          description: Display-oriented genre text; normalized taxonomy is deferred.
         minPlayers:
           type: integer
           format: int32
+          description: Minimum supported player count.
         maxPlayers:
           type: integer
           format: int32
+          description: Maximum supported player count.
         ageRatingAuthority:
           type: string
+          description: Age rating authority such as ESRB or PEGI.
         ageRatingValue:
           type: string
+          description: Authority-specific rating value such as E10+ or 12.
         minAgeYears:
           type: integer
           format: int32
+          description: Minimum recommended player age.
     CatalogTitleSummary:
       type: object
+      description: Public-facing summary for a catalog title.
       required: [id, organizationId, organizationSlug, slug, contentKind, lifecycleStatus, visibility, currentMetadataRevision, displayName, shortDescription, genreDisplay, minPlayers, maxPlayers, playerCountDisplay, ageRatingAuthority, ageRatingValue, minAgeYears, ageDisplay]
       properties:
         id:
@@ -1637,6 +1670,7 @@ components:
         currentMetadataRevision:
           type: integer
           format: int32
+          description: Currently active metadata revision number for the title.
         displayName:
           type: string
         shortDescription:
@@ -1651,6 +1685,7 @@ components:
           format: int32
         playerCountDisplay:
           type: string
+          description: Derived display string based on `minPlayers` and `maxPlayers`.
         ageRatingAuthority:
           type: string
         ageRatingValue:
@@ -1660,10 +1695,12 @@ components:
           format: int32
         ageDisplay:
           type: string
+          description: Derived display string based on `ageRatingAuthority` and `ageRatingValue`.
     CatalogTitle:
       allOf:
         - $ref: '#/components/schemas/CatalogTitleSummary'
         - type: object
+          description: Public-facing detailed catalog title.
           required: [description, createdAt, updatedAt]
           properties:
             description:
@@ -1707,6 +1744,7 @@ components:
           $ref: '#/components/schemas/DeveloperTitle'
     CreateTitleRequest:
       type: object
+      description: Request payload for creating a title with its initial metadata revision.
       required: [slug, contentKind, lifecycleStatus, visibility, metadata]
       properties:
         slug:
@@ -1721,6 +1759,7 @@ components:
           $ref: '#/components/schemas/TitleMetadataInput'
     UpdateTitleRequest:
       type: object
+      description: Request payload for updating stable title fields.
       required: [slug, contentKind, lifecycleStatus, visibility]
       properties:
         slug:
@@ -1734,10 +1773,12 @@ components:
     UpsertTitleMetadataRequest:
       allOf:
         - $ref: '#/components/schemas/TitleMetadataInput'
+      description: Request payload for updating or creating the current metadata revision.
     TitleMetadataVersion:
       allOf:
         - $ref: '#/components/schemas/TitleMetadataInput'
         - type: object
+          description: Developer-facing metadata revision record for a title.
           required: [revisionNumber, isCurrent, isFrozen, playerCountDisplay, ageDisplay, createdAt, updatedAt]
           properties:
             revisionNumber:
