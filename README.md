@@ -42,8 +42,9 @@ Typical workflow:
 2. Commit changes in the `api` repo.
 3. In Postman, refresh/pull the connected repository.
 4. Regenerate/update the API Builder generated collection if the spec changed.
-5. Run contract tests from `Board Third Party Library API (Contract Tests)`.
-6. Save/export updates to the same Git-tracked collection file when test scripts change.
+5. If you run against the Postman mock, reprovision the mock server after the refresh/pull so `Board Third Party Library - Mock` picks up a fresh active mock URL.
+6. Run contract tests from `Board Third Party Library API (Contract Tests)`.
+7. Save/export updates to the same Git-tracked collection file when test scripts change.
 
 ### Known Postman generated collection sync quirk (tag regrouping)
 
@@ -170,6 +171,8 @@ If `mockSourceCollectionName` points to a collection that is not discoverable vi
 9. Run `Board Third Party Library API (Contract Tests)` against `Board Third Party Library - Mock`.
 
 The one-step provisioning request performs a preflight validation of the resolved mock source collection snapshot (route presence + saved examples for currently required endpoints). If it fails, fix the mock source collection/workspace object first instead of trusting mock-based contract test failures.
+
+If the contract test run fails immediately with a `400` response whose body contains `inactiveMockError`, the environment is pointing at a deleted or replaced Postman mock. Refresh/pull the connected repository if needed, rerun `Provision/refresh mock server (one-step)`, and then rerun the contract tests.
 
 ### If runtime Mock environment auto-sync fails
 

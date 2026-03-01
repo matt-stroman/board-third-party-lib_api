@@ -1289,5 +1289,22 @@
       ],
       "id": "86360e86-eb37-46c0-893b-84239d654090"
     }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "var inactiveMockPayload = null;",
+          "try { inactiveMockPayload = pm.response.json(); } catch (e) { inactiveMockPayload = null; }",
+          "var inactiveMockError = inactiveMockPayload && inactiveMockPayload.error && inactiveMockPayload.error.name === \"inactiveMockError\";",
+          "pm.test(\"Configured mock URL is active\", function () {",
+          "  pm.expect(inactiveMockError, \"The configured baseUrl points to an inactive Postman mock. Re-run Postman Admin > Collections > Provision/refresh mock server (one-step) after refreshing the connected repository and then retry the contract tests.\").to.eql(false);",
+          "});",
+          "if (inactiveMockError) { postman.setNextRequest(null); }"
+        ]
+      }
+    }
   ]
 }
