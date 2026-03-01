@@ -524,7 +524,7 @@ paths:
                       updatedAt: '2026-03-01T20:00:00Z'
         '404':
           description: Organization not found.
-  /organizations/{organizationId}:
+  /developer/organizations/{organizationId}:
     put:
       tags: [Organizations]
       summary: Update organization
@@ -604,7 +604,7 @@ paths:
           description: Caller does not have permission to delete this organization.
         '404':
           description: Organization not found.
-  /organizations/{organizationId}/memberships:
+  /developer/organizations/{organizationId}/memberships:
     get:
       tags: [Organizations]
       summary: List organization memberships
@@ -652,7 +652,7 @@ paths:
           description: Caller does not have permission to view memberships for this organization.
         '404':
           description: Organization not found.
-  /organizations/{organizationId}/memberships/{memberKeycloakSubject}:
+  /developer/organizations/{organizationId}/memberships/{memberKeycloakSubject}:
     put:
       tags: [Organizations]
       summary: Add or update organization membership

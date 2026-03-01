@@ -1425,11 +1425,12 @@
               "raw": "{\n  \"slug\": \"stellar-forge-studio\",\n  \"displayName\": \"Stellar Forge Studio\",\n  \"description\": \"Updated studio description.\",\n  \"logoUrl\": \"https://cdn.example.com/orgs/stellar-forge-studio.png\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/organizations/{{organizationId}}",
+              "raw": "{{baseUrl}}/developer/organizations/{{organizationId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "developer",
                 "organizations",
                 "{{organizationId}}"
               ]
@@ -1458,11 +1459,12 @@
                   "raw": "{\n  \"slug\": \"stellar-forge-studio\",\n  \"displayName\": \"Stellar Forge Studio\",\n  \"description\": \"Updated studio description.\",\n  \"logoUrl\": \"https://cdn.example.com/orgs/stellar-forge-studio.png\"\n}"
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/organizations/11111111-1111-1111-1111-111111111111",
+                  "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
+                    "developer",
                     "organizations",
                     "11111111-1111-1111-1111-111111111111"
                   ]
@@ -1520,11 +1522,12 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/organizations/{{organizationId}}/memberships",
+              "raw": "{{baseUrl}}/developer/organizations/{{organizationId}}/memberships",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "developer",
                 "organizations",
                 "{{organizationId}}",
                 "memberships"
@@ -1545,11 +1548,12 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/organizations/11111111-1111-1111-1111-111111111111/memberships",
+                  "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111/memberships",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
+                    "developer",
                     "organizations",
                     "11111111-1111-1111-1111-111111111111",
                     "memberships"
@@ -1619,11 +1623,12 @@
               "raw": "{\n  \"role\": \"editor\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/organizations/{{organizationId}}/memberships/{{organizationMemberSubject}}",
+              "raw": "{{baseUrl}}/developer/organizations/{{organizationId}}/memberships/{{organizationMemberSubject}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "developer",
                 "organizations",
                 "{{organizationId}}",
                 "memberships",
@@ -1654,11 +1659,12 @@
                   "raw": "{\n  \"role\": \"editor\"\n}"
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/organizations/11111111-1111-1111-1111-111111111111/memberships/editor-456",
+                  "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111/memberships/editor-456",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
+                    "developer",
                     "organizations",
                     "11111111-1111-1111-1111-111111111111",
                     "memberships",
