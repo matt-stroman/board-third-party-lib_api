@@ -57,6 +57,35 @@ async function requestJson(url, options) {
   return payload;
 }
 
+function isDeepUpdateConflict(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes(" failed: 409") && message.toLowerCase().includes("deepupdate");
+}
+
+async function delay(milliseconds) {
+  await new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
+async function requestJsonWithRetry(url, options, retryCount = 5) {
+  let attempt = 0;
+
+  while (true) {
+    try {
+      return await requestJson(url, options);
+    } catch (error) {
+      attempt += 1;
+
+      if (attempt >= retryCount || !isDeepUpdateConflict(error)) {
+        throw error;
+      }
+
+      await delay(attempt * 1000);
+    }
+  }
+}
+
 async function deleteMocksByName(apiBase, apiKey, mockName) {
   const payload = await requestJson(`${apiBase}/mocks`, {
     method: "GET",
@@ -219,7 +248,7 @@ async function main() {
   }
 
   const localCollection = stripPostmanIds(JSON.parse(fs.readFileSync(collectionPath, "utf8")));
-  await requestJson(`${apiBase}/collections/${encodeURIComponent(targetCollection.uid)}`, {
+  await requestJsonWithRetry(`${apiBase}/collections/${encodeURIComponent(targetCollection.uid)}`, {
     method: "PUT",
     headers,
     body: JSON.stringify({ collection: localCollection })

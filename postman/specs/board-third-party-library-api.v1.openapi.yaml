@@ -19,12 +19,15 @@ tags:
     description: Global platform roles.
   - name: Identity
     description: Keycloak-backed auth and current-user identity endpoints.
+  - name: Organizations
+    description: Public organization pages and authenticated organization management endpoints.
 paths:
   /:
     get:
       tags: [Health]
       summary: Get API metadata
       operationId: getApiMetadata
+      security: []
       responses:
         '200':
           description: API metadata returned successfully.
@@ -42,6 +45,7 @@ paths:
       tags: [Health]
       summary: Liveness health check
       operationId: getLivenessHealth
+      security: []
       responses:
         '200':
           description: API process is alive.
@@ -60,6 +64,7 @@ paths:
       tags: [Health]
       summary: Readiness health check
       operationId: getReadinessHealth
+      security: []
       parameters:
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
@@ -102,6 +107,7 @@ paths:
       tags: [PlatformRoles]
       summary: List platform roles
       operationId: listPlatformRoles
+      security: []
       responses:
         '200':
           description: Platform roles returned successfully.
@@ -130,6 +136,7 @@ paths:
       tags: [Identity]
       summary: Get authentication configuration
       operationId: getAuthenticationConfiguration
+      security: []
       responses:
         '200':
           description: Keycloak/OpenID Connect configuration returned successfully.
@@ -156,6 +163,7 @@ paths:
       tags: [Identity]
       summary: Start browser login with Keycloak
       operationId: startBrowserLogin
+      security: []
       parameters:
         - name: provider
           in: query
@@ -179,6 +187,7 @@ paths:
       tags: [Identity]
       summary: Complete browser login callback
       operationId: completeBrowserLoginCallback
+      security: []
       parameters:
         - name: code
           in: query
@@ -391,6 +400,401 @@ paths:
                     status: 404
                     detail: No linked Board profile exists for the current user.
                     code: board_profile_not_linked
+  /organizations:
+    get:
+      tags: [Organizations]
+      summary: List public organizations
+      operationId: listOrganizations
+      security: []
+      responses:
+        '200':
+          description: Public organizations returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationListResponse'
+              examples:
+                default:
+                  value:
+                    organizations:
+                      - id: 11111111-1111-1111-1111-111111111111
+                        slug: stellar-forge
+                        displayName: Stellar Forge
+                        description: Family co-op studio.
+                        logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                      - id: 22222222-2222-2222-2222-222222222222
+                        slug: tabletop-sparks
+                        displayName: Tabletop Sparks
+                        description: Party game makers.
+                        logoUrl: null
+    post:
+      tags: [Organizations]
+      summary: Create organization
+      operationId: createOrganization
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+            examples:
+              default:
+                value:
+                  slug: stellar-forge
+                  displayName: Stellar Forge
+                  description: Family co-op studio.
+                  logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+      responses:
+        '201':
+          description: Organization created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+              examples:
+                default:
+                  value:
+                    organization:
+                      id: 11111111-1111-1111-1111-111111111111
+                      slug: stellar-forge
+                      displayName: Stellar Forge
+                      description: Family co-op studio.
+                      logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                      createdAt: '2026-03-01T20:00:00Z'
+                      updatedAt: '2026-03-01T20:00:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to create organizations.
+        '409':
+          description: Organization slug is already in use.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                slug-conflict:
+                  value:
+                    type: https://boardtpl.dev/problems/organization-slug-conflict
+                    title: Organization already exists
+                    status: 409
+                    detail: The supplied organization slug is already in use.
+                    code: organization_slug_conflict
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                validation:
+                  value:
+                    title: One or more validation errors occurred.
+                    status: 422
+                    errors:
+                      slug: [Slug must contain only lowercase letters, numbers, and single hyphen separators.]
+                      displayName: [Display name is required.]
+                      logoUrl: [Logo URL must be an absolute URI.]
+  /organizations/{slug}:
+    get:
+      tags: [Organizations]
+      summary: Get public organization details
+      operationId: getOrganizationBySlug
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Human-readable organization route key.
+      responses:
+        '200':
+          description: Organization details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+              examples:
+                default:
+                  value:
+                    organization:
+                      id: 11111111-1111-1111-1111-111111111111
+                      slug: stellar-forge
+                      displayName: Stellar Forge
+                      description: Family co-op studio.
+                      logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                      createdAt: '2026-03-01T20:00:00Z'
+                      updatedAt: '2026-03-01T20:00:00Z'
+        '404':
+          description: Organization not found.
+  /developer/organizations/{organizationId}:
+    put:
+      tags: [Organizations]
+      summary: Update organization
+      operationId: updateOrganization
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization identifier.
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationRequest'
+            examples:
+              default:
+                value:
+                  slug: stellar-forge-studio
+                  displayName: Stellar Forge Studio
+                  description: Updated studio description.
+                  logoUrl: https://cdn.example.com/orgs/stellar-forge-studio.png
+      responses:
+        '200':
+          description: Organization updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this organization.
+        '404':
+          description: Organization not found.
+        '409':
+          description: Organization slug is already in use.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+    delete:
+      tags: [Organizations]
+      summary: Delete organization
+      operationId: deleteOrganization
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization identifier.
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '204':
+          description: Organization deleted successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to delete this organization.
+        '404':
+          description: Organization not found.
+  /developer/organizations/{organizationId}/memberships:
+    get:
+      tags: [Organizations]
+      summary: List organization memberships
+      operationId: listOrganizationMemberships
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization identifier.
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Organization memberships returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationMembershipListResponse'
+              examples:
+                default:
+                  value:
+                    memberships:
+                      - organizationId: 11111111-1111-1111-1111-111111111111
+                        keycloakSubject: owner-123
+                        displayName: Owner User
+                        email: owner@boardtpl.local
+                        role: owner
+                        joinedAt: '2026-03-01T20:00:00Z'
+                        updatedAt: '2026-03-01T20:00:00Z'
+                      - organizationId: 11111111-1111-1111-1111-111111111111
+                        keycloakSubject: editor-456
+                        displayName: Editor User
+                        email: editor@boardtpl.local
+                        role: editor
+                        joinedAt: '2026-03-01T20:05:00Z'
+                        updatedAt: '2026-03-01T20:05:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to view memberships for this organization.
+        '404':
+          description: Organization not found.
+  /developer/organizations/{organizationId}/memberships/{memberKeycloakSubject}:
+    put:
+      tags: [Organizations]
+      summary: Add or update organization membership
+      operationId: upsertOrganizationMembership
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization identifier.
+        - name: memberKeycloakSubject
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Target user Keycloak subject.
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertOrganizationMembershipRequest'
+            examples:
+              default:
+                value:
+                  role: editor
+      responses:
+        '200':
+          description: Organization membership created or updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationMembershipResponse'
+              examples:
+                default:
+                  value:
+                    membership:
+                      organizationId: 11111111-1111-1111-1111-111111111111
+                      keycloakSubject: editor-456
+                      displayName: Editor User
+                      email: editor@boardtpl.local
+                      role: editor
+                      joinedAt: '2026-03-01T20:05:00Z'
+                      updatedAt: '2026-03-01T20:05:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage memberships for this organization.
+        '404':
+          description: Organization or target user not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                target-user-not-found:
+                  value:
+                    type: https://boardtpl.dev/problems/organization-member-target-not-found
+                    title: Target user not found
+                    status: 404
+                    detail: No local user projection exists for the supplied Keycloak subject.
+                    code: organization_member_target_not_found
+        '409':
+          description: Membership change would remove the last owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                owner-conflict:
+                  value:
+                    type: https://boardtpl.dev/problems/organization-last-owner-conflict
+                    title: Organization owner conflict
+                    status: 409
+                    detail: The last organization owner cannot be removed or downgraded.
+                    code: organization_last_owner_conflict
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+    delete:
+      tags: [Organizations]
+      summary: Remove organization membership
+      operationId: deleteOrganizationMembership
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization identifier.
+        - name: memberKeycloakSubject
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Target user Keycloak subject.
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '204':
+          description: Organization membership removed successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage memberships for this organization.
+        '404':
+          description: Organization or membership not found.
+        '409':
+          description: Membership removal would remove the last owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                owner-conflict:
+                  value:
+                    type: https://boardtpl.dev/problems/organization-last-owner-conflict
+                    title: Organization owner conflict
+                    status: 409
+                    detail: The last organization owner cannot be removed or downgraded.
+                    code: organization_last_owner_conflict
 components:
   parameters:
     PostmanMockResponseCodeHeader:
@@ -595,6 +999,112 @@ components:
           type: string
           format: uri
           nullable: true
+    OrganizationSummary:
+      type: object
+      required: [id, slug, displayName]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          format: uri
+          nullable: true
+    Organization:
+      allOf:
+        - $ref: '#/components/schemas/OrganizationSummary'
+        - type: object
+          required: [createdAt, updatedAt]
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    OrganizationListResponse:
+      type: object
+      required: [organizations]
+      properties:
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationSummary'
+    OrganizationResponse:
+      type: object
+      required: [organization]
+      properties:
+        organization:
+          $ref: '#/components/schemas/Organization'
+    CreateOrganizationRequest:
+      type: object
+      required: [slug, displayName]
+      properties:
+        slug:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoUrl:
+          type: string
+          format: uri
+          nullable: true
+    UpdateOrganizationRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateOrganizationRequest'
+    OrganizationMembership:
+      type: object
+      required: [organizationId, keycloakSubject, role, joinedAt, updatedAt]
+      properties:
+        organizationId:
+          type: string
+          format: uuid
+        keycloakSubject:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        role:
+          type: string
+        joinedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    OrganizationMembershipListResponse:
+      type: object
+      required: [memberships]
+      properties:
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationMembership'
+    OrganizationMembershipResponse:
+      type: object
+      required: [membership]
+      properties:
+        membership:
+          $ref: '#/components/schemas/OrganizationMembership'
+    UpsertOrganizationMembershipRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
     ProblemDetails:
       type: object
       required: [title, status]

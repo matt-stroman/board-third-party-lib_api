@@ -31,6 +31,7 @@ jobs:
         uses: postmanlabs/postman-cli-action@v1
         with:
           api-key: ${{ secrets.POSTMAN_API_KEY }}
+          postman-cli-version: 1.29.5
           working-directory: .
           command: workspace push --yes
 
@@ -47,6 +48,7 @@ jobs:
       - name: Validate synced mock with Postman CLI
         uses: postmanlabs/postman-cli-action@v1
         with:
+          postman-cli-version: 1.29.5
           working-directory: .
           command: >-
             collection run postman/collections/board-third-party-library-api.contract-tests.postman_collection.json
