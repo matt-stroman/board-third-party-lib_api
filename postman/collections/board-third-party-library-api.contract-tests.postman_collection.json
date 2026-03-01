@@ -727,6 +727,417 @@
               "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer token is required.\",\"code\":\"unauthorized\"}"
             }
           ]
+        },
+        {
+          "name": "Get linked Board profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "var token = pm.environment.get(\"accessToken\") || \"\";",
+                  "var hasRealAccessToken = Boolean(token && token.indexOf(\"{{\") !== 0 && token.indexOf(\"replace-with-\") !== 0 && (mode === \"mock\" || token !== \"mock-access-token\"));",
+                  "if (mode !== \"mock\" && !hasRealAccessToken) {",
+                  "  pm.test(\"Get linked Board profile success flow skipped without bearer token\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Board profile exists\", function () { pm.expect(json.boardProfile.boardUserId).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "68cf7890-4679-427d-a110-873b1a710765",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "2ef5ba09-ed27-4207-8623-ff65e751f015",
+              "name": "default",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"boardProfile\":{\"boardUserId\":\"board_user_12345\",\"displayName\":\"BoardKiddo\",\"avatarUrl\":\"https://cdn.board.fun/users/board_user_12345/avatar.png\",\"linkedAt\":\"2026-03-01T18:00:00Z\",\"lastSyncedAt\":\"2026-03-01T18:00:00Z\"}}"
+            },
+            {
+              "id": "9635d70d-af08-4ce6-b312-c2d917586632",
+              "name": "unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "ab49a3a0-7024-47be-91b6-e7075b95e72c",
+              "name": "not-linked",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/board-profile-not-linked\",\"title\":\"Board profile not linked\",\"status\":404,\"detail\":\"No linked Board profile exists for the current user.\",\"code\":\"board_profile_not_linked\"}"
+            }
+          ]
+        },
+        {
+          "name": "Link or update Board profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "var token = pm.environment.get(\"accessToken\") || \"\";",
+                  "var hasRealAccessToken = Boolean(token && token.indexOf(\"{{\") !== 0 && token.indexOf(\"replace-with-\") !== 0 && (mode === \"mock\" || token !== \"mock-access-token\"));",
+                  "if (mode !== \"mock\" && !hasRealAccessToken) {",
+                  "  pm.test(\"Link or update Board profile success flow skipped without bearer token\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Board profile display name matches\", function () { pm.expect(json.boardProfile.displayName).to.eql(\"BoardKiddo\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "b54da123-8c54-4d9c-a07e-779132ce4618",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"boardUserId\": \"board_user_12345\",\n  \"displayName\": \"BoardKiddo\",\n  \"avatarUrl\": \"https://cdn.board.fun/users/board_user_12345/avatar.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "933caffe-f314-4896-ac66-d7c53c6dccb2",
+              "name": "default",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"boardUserId\": \"board_user_12345\",\n  \"displayName\": \"BoardKiddo\",\n  \"avatarUrl\": \"https://cdn.board.fun/users/board_user_12345/avatar.png\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"boardProfile\":{\"boardUserId\":\"board_user_12345\",\"displayName\":\"BoardKiddo\",\"avatarUrl\":\"https://cdn.board.fun/users/board_user_12345/avatar.png\",\"linkedAt\":\"2026-03-01T18:00:00Z\",\"lastSyncedAt\":\"2026-03-01T18:00:00Z\"}}"
+            },
+            {
+              "id": "4a9e12ca-b44f-4568-b253-849eba0d0126",
+              "name": "validation",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"boardUserId\": \"\",\n  \"displayName\": \"\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"title\":\"One or more validation errors occurred.\",\"status\":422,\"errors\":{\"boardUserId\":[\"Board user ID is required.\"],\"displayName\":[\"Display name is required.\"]}}"
+            }
+          ]
+        },
+        {
+          "name": "Unlink Board profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "var token = pm.environment.get(\"accessToken\") || \"\";",
+                  "var hasRealAccessToken = Boolean(token && token.indexOf(\"{{\") !== 0 && token.indexOf(\"replace-with-\") !== 0 && (mode === \"mock\" || token !== \"mock-access-token\"));",
+                  "if (mode !== \"mock\" && !hasRealAccessToken) {",
+                  "  pm.test(\"Unlink Board profile success flow skipped without bearer token\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "id": "061580ee-b27e-4168-b6b3-531a7c7802fc",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "47392516-9861-45c3-b361-f383808e3e9f",
+              "name": "default",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "id": "7d65ec6a-269a-4884-aa35-328826fc7d1d",
+              "name": "not-linked",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/board-profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "board-profile"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/board-profile-not-linked\",\"title\":\"Board profile not linked\",\"status\":404,\"detail\":\"No linked Board profile exists for the current user.\",\"code\":\"board_profile_not_linked\"}"
+            }
+          ]
         }
       ],
       "id": "c5599e89-7bd0-4818-8258-3a98f1722ae1"
@@ -954,6 +1365,63 @@
               "path": [
                 "identity",
                 "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get linked Board profile (Not linked 404 example)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Get linked Board profile (Not linked 404 example) skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 404\", function () { pm.response.to.have.status(404); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem code matches board_profile_not_linked\", function () { pm.expect(json.code).to.eql(\"board_profile_not_linked\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "9ed4094b-751c-4bf1-9532-f6f792e8de9d",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "404",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "not-linked",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/board-profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "board-profile"
               ]
             }
           },

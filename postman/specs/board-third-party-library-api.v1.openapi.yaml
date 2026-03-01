@@ -6,9 +6,9 @@ info:
     Contract-first API definition for the Board Third Party Library.
     Authentication is delegated to Keycloak, so custom password,
     registration, email-verification, refresh-token, and external-identity
-    management endpoints have been removed from this contract. Board profile
-    persistence endpoints are deferred until the application-owned persistence
-    wave is implemented with matching tests.
+    management endpoints have been removed from this contract. Application-owned
+    Wave 1 persistence now includes a local user projection plus optional Board
+    profile linkage/cache.
 servers:
   - url: http://localhost:5085
     description: Local backend
@@ -277,7 +277,121 @@ paths:
                     roles: [admin, developer, player]
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
-  components:
+  /identity/me/board-profile:
+    get:
+      tags: [Identity]
+      summary: Get linked Board profile
+      operationId: getMyBoardProfile
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Linked Board profile returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoardProfileResponse'
+              examples:
+                default:
+                  value:
+                    boardProfile:
+                      boardUserId: board_user_12345
+                      displayName: BoardKiddo
+                      avatarUrl: https://cdn.board.fun/users/board_user_12345/avatar.png
+                      linkedAt: '2026-03-01T18:00:00Z'
+                      lastSyncedAt: '2026-03-01T18:00:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '404':
+          description: No linked Board profile exists for the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not-linked:
+                  value:
+                    type: https://boardtpl.dev/problems/board-profile-not-linked
+                    title: Board profile not linked
+                    status: 404
+                    detail: No linked Board profile exists for the current user.
+                    code: board_profile_not_linked
+    put:
+      tags: [Identity]
+      summary: Link or update Board profile
+      operationId: upsertMyBoardProfile
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertBoardProfileRequest'
+            examples:
+              default:
+                value:
+                  boardUserId: board_user_12345
+                  displayName: BoardKiddo
+                  avatarUrl: https://cdn.board.fun/users/board_user_12345/avatar.png
+      responses:
+        '200':
+          description: Board profile linked or updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoardProfileResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                validation:
+                  value:
+                    title: One or more validation errors occurred.
+                    status: 422
+                    errors:
+                      boardUserId: [Board user ID is required.]
+                      displayName: [Display name is required.]
+    delete:
+      tags: [Identity]
+      summary: Unlink Board profile
+      operationId: deleteMyBoardProfile
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '204':
+          description: Board profile unlinked successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '404':
+          description: No linked Board profile exists for the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not-linked:
+                  value:
+                    type: https://boardtpl.dev/problems/board-profile-not-linked
+                    title: Board profile not linked
+                    status: 404
+                    detail: No linked Board profile exists for the current user.
+                    code: board_profile_not_linked
+components:
   parameters:
     PostmanMockResponseCodeHeader:
       name: x-mock-response-code
@@ -445,6 +559,42 @@ paths:
           type: array
           items:
             type: string
+    BoardProfile:
+      type: object
+      required: [boardUserId, displayName, linkedAt, lastSyncedAt]
+      properties:
+        boardUserId:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        linkedAt:
+          type: string
+          format: date-time
+        lastSyncedAt:
+          type: string
+          format: date-time
+    BoardProfileResponse:
+      type: object
+      required: [boardProfile]
+      properties:
+        boardProfile:
+          $ref: '#/components/schemas/BoardProfile'
+    UpsertBoardProfileRequest:
+      type: object
+      required: [boardUserId, displayName]
+      properties:
+        boardUserId:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
     ProblemDetails:
       type: object
       required: [title, status]
@@ -464,6 +614,18 @@ paths:
         code:
           type: string
           nullable: true
+    ValidationProblemDetails:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          required: [errors]
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
   securitySchemes:
     BearerAuth:
       type: http

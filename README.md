@@ -145,7 +145,7 @@ The current implemented authentication surface is modeled as a Keycloak-hosted b
 - **Callback exchange**: `GET /identity/auth/callback` completes the code exchange and returns tokens plus the resolved current-user summary.
 - **Provider brokering**: optional `provider` query input on `GET /identity/auth/login` maps to Keycloak identity-provider hints for future social-login scenarios.
 - **Account lifecycle ownership**: password reset, email verification, and external identity linking are Keycloak concerns and are no longer modeled as first-party API endpoints in this contract.
-- **Persistence boundary**: Board profile persistence endpoints are intentionally deferred until the application-owned persistence wave exists with matching backend tests and implementation.
+- **Wave 1 persistence**: `GET|PUT|DELETE /identity/me/board-profile` is now part of the maintained contract and maps to the application-owned Board profile linkage/cache persisted in PostgreSQL.
 
 ### Provision the mock server (code-driven in Postman)
 
