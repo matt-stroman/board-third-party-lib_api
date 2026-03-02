@@ -21,6 +21,8 @@ tags:
     description: Keycloak-backed auth and current-user identity endpoints.
   - name: Organizations
     description: Public organization pages and authenticated organization management endpoints.
+  - name: Acquisition
+    description: Supported publisher discovery plus authenticated publisher connection and acquisition binding endpoints.
   - name: Catalog
     description: Public catalog browsing plus authenticated title, media, release, and artifact management endpoints.
 paths:
@@ -849,6 +851,261 @@ paths:
                         minAgeYears: 10
                         ageDisplay: ESRB E10+
                         cardImageUrl: https://cdn.example.com/titles/star-blasters/card.png
+                        acquisitionUrl: https://stellar-forge.itch.io/star-blasters
+  /supported-publishers:
+    get:
+      tags: [Acquisition]
+      summary: List supported publishers
+      description: >
+        Returns the platform-managed publisher registry entries that developers
+        can select when configuring external acquisition connections.
+      operationId: listSupportedPublishers
+      security: []
+      responses:
+        '200':
+          description: Supported publishers returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportedPublisherListResponse'
+              examples:
+                default:
+                  value:
+                    supportedPublishers:
+                      - id: 44444444-4444-4444-4444-444444444444
+                        key: itch-io
+                        displayName: itch.io
+                        homepageUrl: https://itch.io/
+                      - id: 55555555-5555-5555-5555-555555555555
+                        key: humble-bundle
+                        displayName: Humble Bundle
+                        homepageUrl: https://www.humblebundle.com/
+  /developer/organizations/{organizationId}/integration-connections:
+    get:
+      tags: [Acquisition]
+      summary: List integration connections
+      operationId: listIntegrationConnections
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization identifier.
+      responses:
+        '200':
+          description: Integration connections returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationConnectionListResponse'
+              examples:
+                default:
+                  value:
+                    integrationConnections:
+                      - id: 66666666-6666-6666-6666-666666666666
+                        organizationId: 11111111-1111-1111-1111-111111111111
+                        supportedPublisherId: 44444444-4444-4444-4444-444444444444
+                        supportedPublisher:
+                          id: 44444444-4444-4444-4444-444444444444
+                          key: itch-io
+                          displayName: itch.io
+                          homepageUrl: https://itch.io/
+                        isEnabled: true
+                        createdAt: '2026-03-02T20:00:00Z'
+                        updatedAt: '2026-03-02T20:00:00Z'
+                      - id: 77777777-7777-7777-7777-777777777777
+                        organizationId: 11111111-1111-1111-1111-111111111111
+                        customPublisherDisplayName: Stellar Forge Direct
+                        customPublisherHomepageUrl: https://store.stellar-forge.example/
+                        isEnabled: true
+                        createdAt: '2026-03-02T20:05:00Z'
+                        updatedAt: '2026-03-02T20:05:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage integration connections for this organization.
+        '404':
+          description: Organization not found.
+    post:
+      tags: [Acquisition]
+      summary: Create integration connection
+      operationId: createIntegrationConnection
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIntegrationConnectionRequest'
+            examples:
+              supported-publisher:
+                value:
+                  supportedPublisherId: 44444444-4444-4444-4444-444444444444
+                  configuration:
+                    widgetTheme: dark
+                  isEnabled: true
+              custom-publisher:
+                value:
+                  customPublisherDisplayName: Stellar Forge Direct
+                  customPublisherHomepageUrl: https://store.stellar-forge.example/
+                  configuration:
+                    checkoutMode: external
+                  isEnabled: true
+      responses:
+        '201':
+          description: Integration connection created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationConnectionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage integration connections for this organization.
+        '404':
+          description: Organization or supported publisher not found.
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /developer/organizations/{organizationId}/integration-connections/{connectionId}:
+    get:
+      tags: [Acquisition]
+      summary: Get integration connection
+      operationId: getIntegrationConnection
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Integration connection returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationConnectionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage integration connections for this organization.
+        '404':
+          description: Organization or integration connection not found.
+    put:
+      tags: [Acquisition]
+      summary: Update integration connection
+      operationId: updateIntegrationConnection
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIntegrationConnectionRequest'
+      responses:
+        '200':
+          description: Integration connection updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationConnectionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage integration connections for this organization.
+        '404':
+          description: Organization, integration connection, or supported publisher not found.
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+    delete:
+      tags: [Acquisition]
+      summary: Delete integration connection
+      operationId: deleteIntegrationConnection
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Integration connection deleted successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage integration connections for this organization.
+        '404':
+          description: Organization or integration connection not found.
+        '409':
+          description: Integration connection cannot be deleted while it is still referenced by title bindings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                in-use:
+                  value:
+                    type: https://boardtpl.dev/problems/integration-connection-in-use
+                    title: Integration connection in use
+                    status: 409
+                    detail: The integration connection is still referenced by one or more title acquisition bindings.
+                    code: integration_connection_in_use
   /catalog/{organizationSlug}/{titleSlug}:
     get:
       tags: [Catalog]
@@ -901,6 +1158,12 @@ paths:
                       ageRatingValue: E10+
                       minAgeYears: 10
                       ageDisplay: ESRB E10+
+                      cardImageUrl: https://cdn.example.com/titles/star-blasters/card.png
+                      acquisition:
+                        url: https://stellar-forge.itch.io/star-blasters
+                        label: View on itch.io
+                        providerDisplayName: itch.io
+                        providerHomepageUrl: https://itch.io/
                       mediaAssets:
                         - id: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
                           mediaRole: card
@@ -929,6 +1192,223 @@ paths:
                       updatedAt: '2026-03-02T18:10:00Z'
         '404':
           description: Catalog title not found.
+  /developer/titles/{titleId}/integration-bindings:
+    get:
+      tags: [Acquisition]
+      summary: List title integration bindings
+      operationId: listTitleIntegrationBindings
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Title integration bindings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleIntegrationBindingListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title not found.
+    post:
+      tags: [Acquisition]
+      summary: Create title integration binding
+      operationId: createTitleIntegrationBinding
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTitleIntegrationBindingRequest'
+            examples:
+              default:
+                value:
+                  integrationConnectionId: 66666666-6666-6666-6666-666666666666
+                  acquisitionUrl: https://stellar-forge.itch.io/star-blasters
+                  acquisitionLabel: View on itch.io
+                  configuration:
+                    embedWidget: true
+                  isPrimary: true
+                  isEnabled: true
+      responses:
+        '201':
+          description: Title integration binding created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleIntegrationBindingResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or integration connection not found.
+        '409':
+          description: The requested binding would violate title acquisition invariants.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                cross-organization:
+                  value:
+                    type: https://boardtpl.dev/problems/title-integration-organization-conflict
+                    title: Title integration conflict
+                    status: 409
+                    detail: The supplied integration connection must belong to the same organization as the title.
+                    code: title_integration_organization_conflict
+                primary-required:
+                  value:
+                    type: https://boardtpl.dev/problems/title-integration-primary-required
+                    title: Primary binding required
+                    status: 409
+                    detail: Titles with enabled acquisition bindings must keep exactly one enabled primary binding.
+                    code: title_integration_primary_required
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /developer/titles/{titleId}/integration-bindings/{bindingId}:
+    get:
+      tags: [Acquisition]
+      summary: Get title integration binding
+      operationId: getTitleIntegrationBinding
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: bindingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Title integration binding returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleIntegrationBindingResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or binding not found.
+    put:
+      tags: [Acquisition]
+      summary: Update title integration binding
+      operationId: updateTitleIntegrationBinding
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: bindingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTitleIntegrationBindingRequest'
+      responses:
+        '200':
+          description: Title integration binding updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleIntegrationBindingResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title, binding, or integration connection not found.
+        '409':
+          description: The requested binding would violate title acquisition invariants.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+    delete:
+      tags: [Acquisition]
+      summary: Delete title integration binding
+      operationId: deleteTitleIntegrationBinding
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: bindingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Title integration binding deleted successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or binding not found.
+        '409':
+          description: The requested binding would violate title acquisition invariants.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   /developer/organizations/{organizationId}/titles:
     get:
       tags: [Catalog]
@@ -2550,6 +3030,188 @@ components:
       allOf:
         - $ref: '#/components/schemas/CreateReleaseArtifactRequest'
       description: Request payload for updating release artifact metadata.
+    JsonObject:
+      type: object
+      additionalProperties: true
+      description: Free-form JSON object for provider-specific configuration values.
+    SupportedPublisher:
+      type: object
+      required: [id, key, displayName, homepageUrl]
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        displayName:
+          type: string
+        homepageUrl:
+          type: string
+          format: uri
+    SupportedPublisherListResponse:
+      type: object
+      required: [supportedPublishers]
+      properties:
+        supportedPublishers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportedPublisher'
+    PublicTitleAcquisition:
+      type: object
+      required: [url, providerDisplayName]
+      properties:
+        url:
+          type: string
+          format: uri
+        label:
+          type: string
+          nullable: true
+        providerDisplayName:
+          type: string
+        providerHomepageUrl:
+          type: string
+          format: uri
+          nullable: true
+    IntegrationConnection:
+      type: object
+      required: [id, organizationId, isEnabled, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        organizationId:
+          type: string
+          format: uuid
+        supportedPublisherId:
+          type: string
+          format: uuid
+          nullable: true
+        supportedPublisher:
+          $ref: '#/components/schemas/SupportedPublisher'
+        customPublisherDisplayName:
+          type: string
+          nullable: true
+        customPublisherHomepageUrl:
+          type: string
+          format: uri
+          nullable: true
+        configuration:
+          $ref: '#/components/schemas/JsonObject'
+        isEnabled:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateIntegrationConnectionRequest:
+      type: object
+      required: [isEnabled]
+      properties:
+        supportedPublisherId:
+          type: string
+          format: uuid
+          nullable: true
+        customPublisherDisplayName:
+          type: string
+          nullable: true
+        customPublisherHomepageUrl:
+          type: string
+          format: uri
+          nullable: true
+        configuration:
+          $ref: '#/components/schemas/JsonObject'
+        isEnabled:
+          type: boolean
+    UpdateIntegrationConnectionRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateIntegrationConnectionRequest'
+      description: Request payload for updating an organization-scoped integration connection.
+    IntegrationConnectionListResponse:
+      type: object
+      required: [integrationConnections]
+      properties:
+        integrationConnections:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationConnection'
+    IntegrationConnectionResponse:
+      type: object
+      required: [integrationConnection]
+      properties:
+        integrationConnection:
+          $ref: '#/components/schemas/IntegrationConnection'
+    TitleIntegrationBinding:
+      type: object
+      required: [id, titleId, integrationConnectionId, acquisitionUrl, isPrimary, isEnabled, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        titleId:
+          type: string
+          format: uuid
+        integrationConnectionId:
+          type: string
+          format: uuid
+        integrationConnection:
+          $ref: '#/components/schemas/IntegrationConnection'
+        acquisitionUrl:
+          type: string
+          format: uri
+        acquisitionLabel:
+          type: string
+          nullable: true
+        configuration:
+          $ref: '#/components/schemas/JsonObject'
+        isPrimary:
+          type: boolean
+        isEnabled:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateTitleIntegrationBindingRequest:
+      type: object
+      required: [integrationConnectionId, acquisitionUrl, isPrimary, isEnabled]
+      properties:
+        integrationConnectionId:
+          type: string
+          format: uuid
+        acquisitionUrl:
+          type: string
+          format: uri
+        acquisitionLabel:
+          type: string
+          nullable: true
+        configuration:
+          $ref: '#/components/schemas/JsonObject'
+        isPrimary:
+          type: boolean
+        isEnabled:
+          type: boolean
+    UpdateTitleIntegrationBindingRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateTitleIntegrationBindingRequest'
+      description: Request payload for updating a title acquisition binding.
+    TitleIntegrationBindingListResponse:
+      type: object
+      required: [integrationBindings]
+      properties:
+        integrationBindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TitleIntegrationBinding'
+    TitleIntegrationBindingResponse:
+      type: object
+      required: [integrationBinding]
+      properties:
+        integrationBinding:
+          $ref: '#/components/schemas/TitleIntegrationBinding'
     CatalogTitleSummary:
       type: object
       description: Public-facing summary for a catalog title.
@@ -2605,6 +3267,11 @@ components:
           format: uri
           nullable: true
           description: Card/list image URL when the title has a configured `card` media asset.
+        acquisitionUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: External acquisition URL for the title's current enabled primary binding when configured.
     CatalogTitle:
       allOf:
         - $ref: '#/components/schemas/CatalogTitleSummary'
@@ -2620,6 +3287,8 @@ components:
                 $ref: '#/components/schemas/TitleMediaAsset'
             currentRelease:
               $ref: '#/components/schemas/CurrentTitleRelease'
+            acquisition:
+              $ref: '#/components/schemas/PublicTitleAcquisition'
             createdAt:
               type: string
               format: date-time
