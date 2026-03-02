@@ -2827,6 +2827,672 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Create organization (Duplicate slug 409 example)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Create organization (Duplicate slug 409 example) skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 409\", function () { pm.response.to.have.status(409); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem code matches organization_slug_conflict\", function () { pm.expect(json.code).to.eql(\"organization_slug_conflict\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "d19a4fcc-6a14-4950-996f-21c5fe3534ff",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "409",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "duplicate-slug",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"stellar-forge\",\n  \"displayName\": \"Stellar Forge\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/organizations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "organizations"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "1536342f-b424-49c5-ab74-68050601bf66",
+              "name": "duplicate-slug",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"slug\": \"stellar-forge\",\n  \"displayName\": \"Stellar Forge\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/organizations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "organizations"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/organization-slug-conflict\",\"title\":\"Organization already exists\",\"status\":409,\"detail\":\"The supplied organization slug is already in use.\",\"code\":\"organization_slug_conflict\"}"
+            }
+          ]
+        },
+        {
+          "name": "Upsert organization membership (Missing target user 404 example)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Upsert organization membership (Missing target user 404 example) skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 404\", function () { pm.response.to.have.status(404); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem code matches organization_member_target_not_found\", function () { pm.expect(json.code).to.eql(\"organization_member_target_not_found\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "d60af8b1-4e61-4d35-9222-cf5fb66f4e6f",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "404",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "target-user-not-found",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"editor\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111/memberships/missing-user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "developer",
+                "organizations",
+                "11111111-1111-1111-1111-111111111111",
+                "memberships",
+                "missing-user"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "04eb869f-0194-4311-98d5-644b09e6db56",
+              "name": "target-user-not-found",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"editor\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111/memberships/missing-user",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "developer",
+                    "organizations",
+                    "11111111-1111-1111-1111-111111111111",
+                    "memberships",
+                    "missing-user"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/organization-member-target-not-found\",\"title\":\"Target user not found\",\"status\":404,\"detail\":\"No local user projection exists for the supplied Keycloak subject.\",\"code\":\"organization_member_target_not_found\"}"
+            }
+          ]
+        },
+        {
+          "name": "Create title (Validation 422 example)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Create title (Validation 422 example) skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 422\", function () { pm.response.to.have.status(422); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Validation errors include slug and metadata fields\", function () { pm.expect(json.errors.slug).to.be.an(\"array\"); pm.expect(json.errors['metadata.minPlayers']).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "effadd18-fcc4-4c53-b4cb-974ec96f446f",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "422",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "validation-error",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"Invalid Slug\",\n  \"contentKind\": \"invalid\",\n  \"lifecycleStatus\": \"draft\",\n  \"visibility\": \"listed\",\n  \"metadata\": {\n    \"displayName\": \"\",\n    \"shortDescription\": \"\",\n    \"description\": \"\",\n    \"genreDisplay\": \"\",\n    \"minPlayers\": 0,\n    \"maxPlayers\": -1,\n    \"ageRatingAuthority\": \"\",\n    \"ageRatingValue\": \"\",\n    \"minAgeYears\": -2\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111/titles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "developer",
+                "organizations",
+                "11111111-1111-1111-1111-111111111111",
+                "titles"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "c9fd6cd1-4dd9-4e6f-9c14-95ee411f918f",
+              "name": "validation-error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"slug\": \"Invalid Slug\",\n  \"contentKind\": \"invalid\",\n  \"lifecycleStatus\": \"draft\",\n  \"visibility\": \"listed\",\n  \"metadata\": {\n    \"displayName\": \"\",\n    \"shortDescription\": \"\",\n    \"description\": \"\",\n    \"genreDisplay\": \"\",\n    \"minPlayers\": 0,\n    \"maxPlayers\": -1,\n    \"ageRatingAuthority\": \"\",\n    \"ageRatingValue\": \"\",\n    \"minAgeYears\": -2\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111/titles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "developer",
+                    "organizations",
+                    "11111111-1111-1111-1111-111111111111",
+                    "titles"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"title\":\"One or more validation errors occurred.\",\"status\":422,\"errors\":{\"slug\":[\"Slug must contain only lowercase letters, numbers, and single hyphen separators.\"],\"contentKind\":[\"Content kind must be one of: game, app.\"],\"visibility\":[\"Draft titles must use private visibility.\"],\"metadata.displayName\":[\"Display name is required.\"],\"metadata.minPlayers\":[\"Minimum players must be at least 1.\"]}}"
+            }
+          ]
+        },
+        {
+          "name": "Create title (Duplicate slug 409 example)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Create title (Duplicate slug 409 example) skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 409\", function () { pm.response.to.have.status(409); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Problem code matches title_slug_conflict\", function () { pm.expect(json.code).to.eql(\"title_slug_conflict\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "4e8acff8-b806-4564-94da-509dcdd5ca38",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "409",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "duplicate-slug",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"star-blasters\",\n  \"contentKind\": \"game\",\n  \"lifecycleStatus\": \"draft\",\n  \"visibility\": \"private\",\n  \"metadata\": {\n    \"displayName\": \"Star Blasters\",\n    \"shortDescription\": \"Family space battles in short rounds.\",\n    \"description\": \"Pilot colorful starships in family-friendly arena battles.\",\n    \"genreDisplay\": \"Arcade Shooter\",\n    \"minPlayers\": 1,\n    \"maxPlayers\": 4,\n    \"ageRatingAuthority\": \"ESRB\",\n    \"ageRatingValue\": \"E10+\",\n    \"minAgeYears\": 10\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111/titles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "developer",
+                "organizations",
+                "11111111-1111-1111-1111-111111111111",
+                "titles"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "07c87afe-af00-400f-931d-9ab690d5fe2b",
+              "name": "duplicate-slug",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"slug\": \"star-blasters\",\n  \"contentKind\": \"game\",\n  \"lifecycleStatus\": \"draft\",\n  \"visibility\": \"private\",\n  \"metadata\": {\n    \"displayName\": \"Star Blasters\",\n    \"shortDescription\": \"Family space battles in short rounds.\",\n    \"description\": \"Pilot colorful starships in family-friendly arena battles.\",\n    \"genreDisplay\": \"Arcade Shooter\",\n    \"minPlayers\": 1,\n    \"maxPlayers\": 4,\n    \"ageRatingAuthority\": \"ESRB\",\n    \"ageRatingValue\": \"E10+\",\n    \"minAgeYears\": 10\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/developer/organizations/11111111-1111-1111-1111-111111111111/titles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "developer",
+                    "organizations",
+                    "11111111-1111-1111-1111-111111111111",
+                    "titles"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/title-slug-conflict\",\"title\":\"Title already exists\",\"status\":409,\"detail\":\"The supplied title slug is already in use within the organization.\",\"code\":\"title_slug_conflict\"}"
+            }
+          ]
+        },
+        {
+          "name": "Update current title metadata (Validation 422 example)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Update current title metadata (Validation 422 example) skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 422\", function () { pm.response.to.have.status(422); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Validation errors include metadata fields\", function () { pm.expect(json.errors['metadata.displayName']).to.be.an(\"array\"); pm.expect(json.errors['metadata.maxPlayers']).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "f4a0f97e-4e5b-4f25-81b8-24da22ce17f6",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "422",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "validation-error",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"\",\n  \"shortDescription\": \"\",\n  \"description\": \"\",\n  \"genreDisplay\": \"\",\n  \"minPlayers\": 0,\n  \"maxPlayers\": -1,\n  \"ageRatingAuthority\": \"\",\n  \"ageRatingValue\": \"\",\n  \"minAgeYears\": -1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/developer/titles/33333333-3333-3333-3333-333333333333/metadata/current",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "developer",
+                "titles",
+                "33333333-3333-3333-3333-333333333333",
+                "metadata",
+                "current"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "5d58bf91-7f81-4c96-8c8d-cc90fd4b0684",
+              "name": "validation-error",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"displayName\": \"\",\n  \"shortDescription\": \"\",\n  \"description\": \"\",\n  \"genreDisplay\": \"\",\n  \"minPlayers\": 0,\n  \"maxPlayers\": -1,\n  \"ageRatingAuthority\": \"\",\n  \"ageRatingValue\": \"\",\n  \"minAgeYears\": -1\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/developer/titles/33333333-3333-3333-3333-333333333333/metadata/current",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "developer",
+                    "titles",
+                    "33333333-3333-3333-3333-333333333333",
+                    "metadata",
+                    "current"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"title\":\"One or more validation errors occurred.\",\"status\":422,\"errors\":{\"metadata.displayName\":[\"Display name is required.\"],\"metadata.shortDescription\":[\"Short description is required.\"],\"metadata.description\":[\"Description is required.\"],\"metadata.genreDisplay\":[\"Genre display is required.\"],\"metadata.maxPlayers\":[\"Maximum players must be greater than or equal to minimum players.\"],\"metadata.ageRatingAuthority\":[\"Age rating authority is required.\"]}}"
+            }
+          ]
+        },
+        {
+          "name": "Activate metadata revision (Missing revision 404 example)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Activate metadata revision (Missing revision 404 example) skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "id": "2377b395-48f4-4207-a759-c2077f91cb8b",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "404",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "missing-revision",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/developer/titles/33333333-3333-3333-3333-333333333333/metadata-versions/99/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "developer",
+                "titles",
+                "33333333-3333-3333-3333-333333333333",
+                "metadata-versions",
+                "99",
+                "activate"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "1d9fd3ff-0d53-458d-ae38-c1f1716d0c99",
+              "name": "missing-revision",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/developer/titles/33333333-3333-3333-3333-333333333333/metadata-versions/99/activate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "developer",
+                    "titles",
+                    "33333333-3333-3333-3333-333333333333",
+                    "metadata-versions",
+                    "99",
+                    "activate"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            }
+          ]
         }
       ],
       "id": "86360e86-eb37-46c0-893b-84239d654090"
