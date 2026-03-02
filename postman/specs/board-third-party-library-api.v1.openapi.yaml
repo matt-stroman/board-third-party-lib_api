@@ -22,7 +22,7 @@ tags:
   - name: Organizations
     description: Public organization pages and authenticated organization management endpoints.
   - name: Catalog
-    description: Public catalog browsing plus authenticated title and metadata management endpoints.
+    description: Public catalog browsing plus authenticated title, media, release, and artifact management endpoints.
 paths:
   /:
     get:
@@ -848,6 +848,7 @@ paths:
                         ageRatingValue: E10+
                         minAgeYears: 10
                         ageDisplay: ESRB E10+
+                        cardImageUrl: https://cdn.example.com/titles/star-blasters/card.png
   /catalog/{organizationSlug}/{titleSlug}:
     get:
       tags: [Catalog]
@@ -900,6 +901,30 @@ paths:
                       ageRatingValue: E10+
                       minAgeYears: 10
                       ageDisplay: ESRB E10+
+                      mediaAssets:
+                        - id: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+                          mediaRole: card
+                          sourceUrl: https://cdn.example.com/titles/star-blasters/card.png
+                          altText: Box art showing colorful starships.
+                          mimeType: image/png
+                          width: 640
+                          height: 360
+                          createdAt: '2026-03-02T18:00:00Z'
+                          updatedAt: '2026-03-02T18:00:00Z'
+                        - id: bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
+                          mediaRole: hero
+                          sourceUrl: https://cdn.example.com/titles/star-blasters/hero.png
+                          altText: Full-screen battle scene.
+                          mimeType: image/png
+                          width: 1920
+                          height: 1080
+                          createdAt: '2026-03-02T18:00:00Z'
+                          updatedAt: '2026-03-02T18:00:00Z'
+                      currentRelease:
+                        id: cccccccc-cccc-cccc-cccc-cccccccccccc
+                        version: 1.0.0
+                        metadataRevisionNumber: 2
+                        publishedAt: '2026-03-02T19:00:00Z'
                       createdAt: '2026-03-02T18:00:00Z'
                       updatedAt: '2026-03-02T18:10:00Z'
         '404':
@@ -1023,6 +1048,7 @@ paths:
                       ageRatingValue: E10+
                       minAgeYears: 10
                       ageDisplay: ESRB E10+
+                      mediaAssets: []
                       createdAt: '2026-03-02T18:00:00Z'
                       updatedAt: '2026-03-02T18:00:00Z'
         '401':
@@ -1283,6 +1309,715 @@ paths:
           description: Caller does not have permission to manage this title.
         '404':
           description: Title or metadata revision not found.
+  /developer/titles/{titleId}/media:
+    get:
+      tags: [Catalog]
+      summary: List title media assets
+      operationId: listTitleMediaAssets
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+      responses:
+        '200':
+          description: Title media assets returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleMediaAssetListResponse'
+              examples:
+                default:
+                  value:
+                    mediaAssets:
+                      - id: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+                        mediaRole: card
+                        sourceUrl: https://cdn.example.com/titles/star-blasters/card.png
+                        altText: Box art showing colorful starships.
+                        mimeType: image/png
+                        width: 640
+                        height: 360
+                        createdAt: '2026-03-02T18:00:00Z'
+                        updatedAt: '2026-03-02T18:00:00Z'
+                      - id: bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
+                        mediaRole: hero
+                        sourceUrl: https://cdn.example.com/titles/star-blasters/hero.png
+                        altText: Full-screen battle scene.
+                        mimeType: image/png
+                        width: 1920
+                        height: 1080
+                        createdAt: '2026-03-02T18:00:00Z'
+                        updatedAt: '2026-03-02T18:00:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title not found.
+  /developer/titles/{titleId}/media/{mediaRole}:
+    put:
+      tags: [Catalog]
+      summary: Upsert title media asset
+      operationId: upsertTitleMediaAsset
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: mediaRole
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/TitleMediaRole'
+          description: Media slot to create or replace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertTitleMediaAssetRequest'
+            examples:
+              default:
+                value:
+                  sourceUrl: https://cdn.example.com/titles/star-blasters/card.png
+                  altText: Box art showing colorful starships.
+                  mimeType: image/png
+                  width: 640
+                  height: 360
+      responses:
+        '200':
+          description: Title media asset upserted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleMediaAssetResponse'
+              examples:
+                default:
+                  value:
+                    mediaAsset:
+                      id: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+                      mediaRole: card
+                      sourceUrl: https://cdn.example.com/titles/star-blasters/card.png
+                      altText: Box art showing colorful starships.
+                      mimeType: image/png
+                      width: 640
+                      height: 360
+                      createdAt: '2026-03-02T18:00:00Z'
+                      updatedAt: '2026-03-02T18:00:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title not found.
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+    delete:
+      tags: [Catalog]
+      summary: Delete title media asset
+      operationId: deleteTitleMediaAsset
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: mediaRole
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/TitleMediaRole'
+          description: Media slot to delete.
+      responses:
+        '204':
+          description: Title media asset deleted successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or media asset not found.
+  /developer/titles/{titleId}/releases:
+    get:
+      tags: [Catalog]
+      summary: List title releases
+      operationId: listTitleReleases
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+      responses:
+        '200':
+          description: Title releases returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleReleaseListResponse'
+              examples:
+                default:
+                  value:
+                    releases:
+                      - id: cccccccc-cccc-cccc-cccc-cccccccccccc
+                        version: 1.0.0
+                        status: published
+                        metadataRevisionNumber: 2
+                        isCurrent: true
+                        publishedAt: '2026-03-02T19:00:00Z'
+                        createdAt: '2026-03-02T18:30:00Z'
+                        updatedAt: '2026-03-02T19:00:00Z'
+                      - id: dddddddd-dddd-dddd-dddd-dddddddddddd
+                        version: 1.1.0-rc.1
+                        status: draft
+                        metadataRevisionNumber: 2
+                        isCurrent: false
+                        createdAt: '2026-03-02T19:10:00Z'
+                        updatedAt: '2026-03-02T19:10:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title not found.
+    post:
+      tags: [Catalog]
+      summary: Create title release
+      operationId: createTitleRelease
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTitleReleaseRequest'
+            examples:
+              default:
+                value:
+                  version: 1.0.0
+                  metadataRevisionNumber: 2
+      responses:
+        '201':
+          description: Title release created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleReleaseResponse'
+              examples:
+                default:
+                  value:
+                    release:
+                      id: cccccccc-cccc-cccc-cccc-cccccccccccc
+                      version: 1.0.0
+                      status: draft
+                      metadataRevisionNumber: 2
+                      isCurrent: false
+                      createdAt: '2026-03-02T18:30:00Z'
+                      updatedAt: '2026-03-02T18:30:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or metadata revision not found.
+        '409':
+          description: Release version is already in use for this title.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                duplicate-version:
+                  value:
+                    type: https://boardtpl.dev/problems/title-release-version-conflict
+                    title: Release already exists
+                    status: 409
+                    detail: The supplied release version is already in use for this title.
+                    code: title_release_version_conflict
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /developer/titles/{titleId}/releases/{releaseId}:
+    get:
+      tags: [Catalog]
+      summary: Get title release details
+      operationId: getTitleRelease
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+      responses:
+        '200':
+          description: Title release returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleReleaseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or release not found.
+    put:
+      tags: [Catalog]
+      summary: Update title release
+      operationId: updateTitleRelease
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTitleReleaseRequest'
+      responses:
+        '200':
+          description: Title release updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleReleaseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or release not found.
+        '409':
+          description: Release cannot be modified in its current state or version conflicts with another release.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /developer/titles/{titleId}/releases/{releaseId}/publish:
+    post:
+      tags: [Catalog]
+      summary: Publish title release
+      operationId: publishTitleRelease
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+      responses:
+        '200':
+          description: Release published successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleReleaseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or release not found.
+        '409':
+          description: Release cannot be published in its current state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                missing-artifact:
+                  value:
+                    type: https://boardtpl.dev/problems/title-release-publish-requires-artifact
+                    title: Release cannot be published
+                    status: 409
+                    detail: A release must include at least one artifact before it can be published.
+                    code: title_release_publish_requires_artifact
+  /developer/titles/{titleId}/releases/{releaseId}/activate:
+    post:
+      tags: [Catalog]
+      summary: Activate title release
+      description: >
+        Sets the supplied release as the current public release for the title.
+        Only published releases can be activated.
+      operationId: activateTitleRelease
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+      responses:
+        '200':
+          description: Release activated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperTitleResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or release not found.
+        '409':
+          description: Release cannot be activated in its current state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                unpublished-release:
+                  value:
+                    type: https://boardtpl.dev/problems/title-release-state-conflict
+                    title: Release state conflict
+                    status: 409
+                    detail: Only published releases can be activated.
+                    code: title_release_state_conflict
+  /developer/titles/{titleId}/releases/{releaseId}/withdraw:
+    post:
+      tags: [Catalog]
+      summary: Withdraw title release
+      operationId: withdrawTitleRelease
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+      responses:
+        '200':
+          description: Release withdrawn successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleReleaseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or release not found.
+        '409':
+          description: Release cannot be withdrawn in its current state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /developer/titles/{titleId}/releases/{releaseId}/artifacts:
+    get:
+      tags: [Catalog]
+      summary: List release artifacts
+      operationId: listReleaseArtifacts
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+      responses:
+        '200':
+          description: Release artifacts returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseArtifactListResponse'
+              examples:
+                default:
+                  value:
+                    artifacts:
+                      - id: eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee
+                        artifactKind: apk
+                        packageName: fun.board.starblasters
+                        versionCode: 100
+                        sha256: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+                        fileSizeBytes: 104857600
+                        createdAt: '2026-03-02T18:40:00Z'
+                        updatedAt: '2026-03-02T18:40:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or release not found.
+    post:
+      tags: [Catalog]
+      summary: Create release artifact
+      operationId: createReleaseArtifact
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReleaseArtifactRequest'
+      responses:
+        '201':
+          description: Release artifact created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseArtifactResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title or release not found.
+        '409':
+          description: Artifact conflicts with an existing artifact or the release state does not allow edits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /developer/titles/{titleId}/releases/{releaseId}/artifacts/{artifactId}:
+    put:
+      tags: [Catalog]
+      summary: Update release artifact
+      operationId: updateReleaseArtifact
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+        - name: artifactId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Artifact identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReleaseArtifactRequest'
+      responses:
+        '200':
+          description: Release artifact updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseArtifactResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title, release, or artifact not found.
+        '409':
+          description: Artifact conflicts with an existing artifact or the release state does not allow edits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+    delete:
+      tags: [Catalog]
+      summary: Delete release artifact
+      operationId: deleteReleaseArtifact
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Release identifier.
+        - name: artifactId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Artifact identifier.
+      responses:
+        '204':
+          description: Release artifact deleted successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title, release, or artifact not found.
+        '409':
+          description: The release state does not allow artifact edits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
 components:
   parameters:
     PostmanMockResponseCodeHeader:
@@ -1611,6 +2346,18 @@ components:
         titles appear in browse results, `unlisted` titles are direct-link
         only, and `private` titles are not publicly reachable.
       enum: [private, unlisted, listed]
+    TitleMediaRole:
+      type: string
+      description: Fixed Board-style media slot.
+      enum: [card, hero, logo]
+    TitleReleaseStatus:
+      type: string
+      description: Release lifecycle state.
+      enum: [draft, published, withdrawn]
+    ReleaseArtifactKind:
+      type: string
+      description: Artifact kind currently supported by Wave 4.
+      enum: [apk]
     TitleMetadataInput:
       type: object
       description: Player-facing metadata payload for a title revision.
@@ -1646,6 +2393,163 @@ components:
           type: integer
           format: int32
           description: Minimum recommended player age.
+    UpsertTitleMediaAssetRequest:
+      type: object
+      required: [sourceUrl]
+      properties:
+        sourceUrl:
+          type: string
+          format: uri
+          description: Absolute URL for the media asset.
+        altText:
+          type: string
+          description: Optional human-readable alt text.
+        mimeType:
+          type: string
+          description: Optional MIME type such as `image/png`.
+        width:
+          type: integer
+          format: int32
+          description: Optional pixel width when known.
+        height:
+          type: integer
+          format: int32
+          description: Optional pixel height when known.
+    TitleMediaAsset:
+      type: object
+      required: [id, mediaRole, sourceUrl, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        mediaRole:
+          $ref: '#/components/schemas/TitleMediaRole'
+        sourceUrl:
+          type: string
+          format: uri
+        altText:
+          type: string
+          nullable: true
+        mimeType:
+          type: string
+          nullable: true
+        width:
+          type: integer
+          format: int32
+          nullable: true
+        height:
+          type: integer
+          format: int32
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CurrentTitleRelease:
+      type: object
+      required: [id, version, metadataRevisionNumber, publishedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: string
+        metadataRevisionNumber:
+          type: integer
+          format: int32
+        publishedAt:
+          type: string
+          format: date-time
+    TitleReleaseSummary:
+      type: object
+      required: [id, version, status, metadataRevisionNumber, isCurrent, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: string
+        status:
+          $ref: '#/components/schemas/TitleReleaseStatus'
+        metadataRevisionNumber:
+          type: integer
+          format: int32
+        isCurrent:
+          type: boolean
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateTitleReleaseRequest:
+      type: object
+      required: [version, metadataRevisionNumber]
+      properties:
+        version:
+          type: string
+          description: Public semver release identifier.
+        metadataRevisionNumber:
+          type: integer
+          format: int32
+          description: Metadata revision number captured by this release.
+    UpdateTitleReleaseRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateTitleReleaseRequest'
+      description: Request payload for updating a draft title release.
+    ReleaseArtifact:
+      type: object
+      required: [id, artifactKind, packageName, versionCode, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        artifactKind:
+          $ref: '#/components/schemas/ReleaseArtifactKind'
+        packageName:
+          type: string
+        versionCode:
+          type: integer
+          format: int64
+        sha256:
+          type: string
+          nullable: true
+        fileSizeBytes:
+          type: integer
+          format: int64
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateReleaseArtifactRequest:
+      type: object
+      required: [artifactKind, packageName, versionCode]
+      properties:
+        artifactKind:
+          $ref: '#/components/schemas/ReleaseArtifactKind'
+        packageName:
+          type: string
+        versionCode:
+          type: integer
+          format: int64
+        sha256:
+          type: string
+        fileSizeBytes:
+          type: integer
+          format: int64
+    UpdateReleaseArtifactRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateReleaseArtifactRequest'
+      description: Request payload for updating release artifact metadata.
     CatalogTitleSummary:
       type: object
       description: Public-facing summary for a catalog title.
@@ -1696,15 +2600,26 @@ components:
         ageDisplay:
           type: string
           description: Derived display string based on `ageRatingAuthority` and `ageRatingValue`.
+        cardImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Card/list image URL when the title has a configured `card` media asset.
     CatalogTitle:
       allOf:
         - $ref: '#/components/schemas/CatalogTitleSummary'
         - type: object
           description: Public-facing detailed catalog title.
-          required: [description, createdAt, updatedAt]
+          required: [description, mediaAssets, createdAt, updatedAt]
           properties:
             description:
               type: string
+            mediaAssets:
+              type: array
+              items:
+                $ref: '#/components/schemas/TitleMediaAsset'
+            currentRelease:
+              $ref: '#/components/schemas/CurrentTitleRelease'
             createdAt:
               type: string
               format: date-time
@@ -1714,6 +2629,12 @@ components:
     DeveloperTitle:
       allOf:
         - $ref: '#/components/schemas/CatalogTitle'
+        - type: object
+          properties:
+            currentReleaseId:
+              type: string
+              format: uuid
+              nullable: true
     CatalogTitleListResponse:
       type: object
       required: [titles]
@@ -1806,6 +2727,51 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TitleMetadataVersion'
+    TitleMediaAssetListResponse:
+      type: object
+      required: [mediaAssets]
+      properties:
+        mediaAssets:
+          type: array
+          items:
+            $ref: '#/components/schemas/TitleMediaAsset'
+    TitleMediaAssetResponse:
+      type: object
+      required: [mediaAsset]
+      properties:
+        mediaAsset:
+          $ref: '#/components/schemas/TitleMediaAsset'
+    TitleRelease:
+      allOf:
+        - $ref: '#/components/schemas/TitleReleaseSummary'
+    TitleReleaseListResponse:
+      type: object
+      required: [releases]
+      properties:
+        releases:
+          type: array
+          items:
+            $ref: '#/components/schemas/TitleRelease'
+    TitleReleaseResponse:
+      type: object
+      required: [release]
+      properties:
+        release:
+          $ref: '#/components/schemas/TitleRelease'
+    ReleaseArtifactListResponse:
+      type: object
+      required: [artifacts]
+      properties:
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReleaseArtifact'
+    ReleaseArtifactResponse:
+      type: object
+      required: [artifact]
+      properties:
+        artifact:
+          $ref: '#/components/schemas/ReleaseArtifact'
     ProblemDetails:
       type: object
       required: [title, status]
