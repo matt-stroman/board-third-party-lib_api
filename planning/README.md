@@ -9,4 +9,5 @@ Current implemented catalog/title behavior is also summarized in [`backend/docs/
 
 Current planning artifacts:
 
+- [`catalog-browse-contract-draft.md`](catalog-browse-contract-draft.md)
 - [`initial-data-schema-plan.md`](initial-data-schema-plan.md)

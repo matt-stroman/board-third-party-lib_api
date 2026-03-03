@@ -1,7 +1,7 @@
 param(
     [string]$CollectionPath = "postman/collections/board-third-party-library-api.contract-tests.postman_collection.json",
     [string]$EnvironmentPath = "postman/environments/board-third-party-library_local.postman_environment.json",
-    [string]$BaseUrl = "http://localhost:5085",
+    [string]$BaseUrl = "https://localhost:7085",
     [ValidateSet("live", "mock")]
     [string]$ContractExecutionMode = "live",
     [string]$ReportPath = "postman-cli-reports/local-contract-tests.xml"
@@ -25,6 +25,7 @@ try {
         --environment $EnvironmentPath `
         --env-var "baseUrl=$BaseUrl" `
         --env-var "contractExecutionMode=$ContractExecutionMode" `
+        --insecure `
         --bail failure `
         --reporters cli,junit `
         --reporter-junit-export $ReportPath `

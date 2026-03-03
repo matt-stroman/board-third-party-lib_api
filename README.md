@@ -78,7 +78,7 @@ That root command runs:
 
 - the Git-tracked contract test collection
 - against the Git-tracked local environment template
-- with `baseUrl=http://localhost:5085`
+- with `baseUrl=https://localhost:7085`
 - with `contractExecutionMode=live`
 
 If the backend is not already running in another terminal, the root CLI can start it for the run:

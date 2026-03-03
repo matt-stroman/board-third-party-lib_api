@@ -10,7 +10,7 @@ info:
     Wave 1 persistence now includes a local user projection plus optional Board
     profile linkage/cache.
 servers:
-  - url: http://localhost:5085
+  - url: https://localhost:7085
     description: Local backend
 tags:
   - name: Health
@@ -151,14 +151,14 @@ paths:
               examples:
                 local:
                   value:
-                    issuer: http://localhost:8080/realms/board-third-party-library/
-                    authorizationEndpoint: http://localhost:8080/realms/board-third-party-library/protocol/openid-connect/auth
-                    tokenEndpoint: http://localhost:8080/realms/board-third-party-library/protocol/openid-connect/token
-                    logoutEndpoint: http://localhost:8080/realms/board-third-party-library/protocol/openid-connect/logout
-                    jwksUri: http://localhost:8080/realms/board-third-party-library/protocol/openid-connect/certs
-                    accountManagementUrl: http://localhost:8080/realms/board-third-party-library/account
+                    issuer: https://localhost:8443/realms/board-third-party-library/
+                    authorizationEndpoint: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/auth
+                    tokenEndpoint: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/token
+                    logoutEndpoint: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/logout
+                    jwksUri: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/certs
+                    accountManagementUrl: https://localhost:8443/realms/board-third-party-library/account
                     clientId: board-third-party-library-backend
-                    callbackUrl: http://localhost:5085/identity/auth/callback
+                    callbackUrl: https://localhost:7085/identity/auth/callback
                     scopes: [openid, profile, email]
                     registrationEnabled: true
                     externalIdentityProviders: []
@@ -185,7 +185,7 @@ paths:
               schema:
                 type: string
                 format: uri
-              example: http://localhost:8080/realms/board-third-party-library/protocol/openid-connect/auth?client_id=board-third-party-library-backend&redirect_uri=http%3A%2F%2Flocalhost%3A5085%2Fidentity%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email&state=st_mock_123&code_challenge=pkce_mock_123&code_challenge_method=S256
+              example: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/auth?client_id=board-third-party-library-backend&redirect_uri=https%3A%2F%2Flocalhost%3A7085%2Fidentity%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email&state=st_mock_123&code_challenge=pkce_mock_123&code_challenge_method=S256
   /identity/auth/callback:
     get:
       tags: [Identity]
@@ -537,6 +537,41 @@ paths:
                       updatedAt: '2026-03-01T20:00:00Z'
         '404':
           description: Organization not found.
+  /developer/organizations:
+    get:
+      tags: [Organizations]
+      summary: List organizations the caller can manage
+      operationId: listManagedOrganizations
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Developer-visible organizations returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperOrganizationListResponse'
+              examples:
+                default:
+                  value:
+                    organizations:
+                      - id: 11111111-1111-1111-1111-111111111111
+                        slug: stellar-forge
+                        displayName: Stellar Forge
+                        description: Family co-op studio.
+                        logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                        role: owner
+                      - id: 22222222-2222-2222-2222-222222222222
+                        slug: tabletop-sparks
+                        displayName: Tabletop Sparks
+                        description: Party game makers.
+                        logoUrl: null
+                        role: editor
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
   /developer/organizations/{organizationId}:
     put:
       tags: [Organizations]
@@ -821,6 +856,39 @@ paths:
           schema:
             $ref: '#/components/schemas/TitleContentKind'
           description: Optional title kind filter.
+        - name: genre
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional exact `genreDisplay` filter.
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [title, genre]
+            default: title
+          description: Stable sort mode for the returned titles.
+        - name: pageNumber
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 1
+          description: 1-based page number.
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 48
+            default: 12
+          description: Number of titles returned per page.
       responses:
         '200':
           description: Public catalog titles returned successfully.
@@ -852,6 +920,28 @@ paths:
                         ageDisplay: ESRB E10+
                         cardImageUrl: https://cdn.example.com/titles/star-blasters/card.png
                         acquisitionUrl: https://stellar-forge.itch.io/star-blasters
+                    paging:
+                      pageNumber: 1
+                      pageSize: 12
+                      totalCount: 1
+                      totalPages: 1
+                      hasPreviousPage: false
+                      hasNextPage: false
+        '422':
+          description: Validation failed for one or more catalog query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                invalid-query:
+                  value:
+                    title: One or more validation errors occurred.
+                    status: 422
+                    errors:
+                      sort: [Sort must be one of: title, genre.]
+                      pageNumber: [Page number must be at least 1.]
+                      pageSize: [Page size must be between 1 and 48.]
   /supported-publishers:
     get:
       tags: [Acquisition]
@@ -2769,6 +2859,14 @@ components:
             updatedAt:
               type: string
               format: date-time
+    DeveloperOrganizationSummary:
+      allOf:
+        - $ref: '#/components/schemas/OrganizationSummary'
+        - type: object
+          required: [role]
+          properties:
+            role:
+              type: string
     OrganizationListResponse:
       type: object
       required: [organizations]
@@ -2777,6 +2875,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrganizationSummary'
+    DeveloperOrganizationListResponse:
+      type: object
+      required: [organizations]
+      properties:
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeveloperOrganizationSummary'
     OrganizationResponse:
       type: object
       required: [organization]
@@ -3343,12 +3449,34 @@ components:
               nullable: true
     CatalogTitleListResponse:
       type: object
-      required: [titles]
+      required: [titles, paging]
       properties:
         titles:
           type: array
           items:
             $ref: '#/components/schemas/CatalogTitleSummary'
+        paging:
+          $ref: '#/components/schemas/CatalogPaging'
+    CatalogPaging:
+      type: object
+      required: [pageNumber, pageSize, totalCount, totalPages, hasPreviousPage, hasNextPage]
+      properties:
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
     CatalogTitleResponse:
       type: object
       required: [title]
