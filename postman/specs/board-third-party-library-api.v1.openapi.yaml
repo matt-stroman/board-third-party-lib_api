@@ -19,6 +19,8 @@ tags:
     description: Global platform roles.
   - name: Identity
     description: Keycloak-backed auth and current-user identity endpoints.
+  - name: Moderation
+    description: Moderator-only workflows for reviewing developer enrollment requests.
   - name: Organizations
     description: Public organization pages and authenticated organization management endpoints.
   - name: Acquisition
@@ -291,9 +293,68 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
   /identity/me/developer-enrollment:
+    get:
+      tags: [Identity]
+      summary: Get developer enrollment status for the current user
+      operationId: getMyDeveloperEnrollment
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Developer enrollment status returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperEnrollmentResponse'
+              examples:
+                not-requested:
+                  value:
+                    developerEnrollment:
+                      requestId: null
+                      status: not_requested
+                      developerAccessEnabled: false
+                      canSubmitRequest: true
+                      requestedAt: null
+                      reviewedAt: null
+                      reviewerSubject: null
+                pending:
+                  value:
+                    developerEnrollment:
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      status: pending
+                      developerAccessEnabled: false
+                      canSubmitRequest: false
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: null
+                      reviewerSubject: null
+                approved:
+                  value:
+                    developerEnrollment:
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      status: approved
+                      developerAccessEnabled: true
+                      canSubmitRequest: false
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: '2026-03-03T21:05:00Z'
+                      reviewerSubject: moderator-123
+                rejected:
+                  value:
+                    developerEnrollment:
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      status: rejected
+                      developerAccessEnabled: false
+                      canSubmitRequest: false
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: '2026-03-03T21:05:00Z'
+                      reviewerSubject: moderator-123
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
     post:
       tags: [Identity]
-      summary: Enable developer access for the current user
+      summary: Submit a developer enrollment request for the current user
       operationId: enrollCurrentUserAsDeveloper
       security:
         - BearerAuth: []
@@ -302,30 +363,189 @@ paths:
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
       responses:
         '200':
-          description: Developer access is enabled for the current user.
+          description: Developer enrollment request state returned successfully.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeveloperEnrollmentResponse'
               examples:
-                enabled:
+                requested:
                   value:
                     developerEnrollment:
-                      status: enabled
-                      developerAccessEnabled: true
-                      alreadyEnabled: false
-                      sessionRefreshRequired: true
-                already-enabled:
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      status: pending
+                      developerAccessEnabled: false
+                      canSubmitRequest: false
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: null
+                      reviewerSubject: null
+                already-pending:
                   value:
                     developerEnrollment:
-                      status: enabled
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      status: pending
+                      developerAccessEnabled: false
+                      canSubmitRequest: false
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: null
+                      reviewerSubject: null
+                already-approved:
+                  value:
+                    developerEnrollment:
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      status: approved
                       developerAccessEnabled: true
-                      alreadyEnabled: true
-                      sessionRefreshRequired: false
+                      canSubmitRequest: false
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: '2026-03-03T21:05:00Z'
+                      reviewerSubject: moderator-123
+                rejected:
+                  value:
+                    developerEnrollment:
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      status: rejected
+                      developerAccessEnabled: false
+                      canSubmitRequest: false
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: '2026-03-03T21:05:00Z'
+                      reviewerSubject: moderator-123
+                already-enabled-without-request:
+                  value:
+                    developerEnrollment:
+                      requestId: null
+                      status: approved
+                      developerAccessEnabled: true
+                      canSubmitRequest: false
+                      requestedAt: null
+                      reviewedAt: null
+                      reviewerSubject: null
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
+  /moderation/developer-enrollment-requests:
+    get:
+      tags: [Moderation]
+      summary: List developer enrollment requests
+      operationId: listDeveloperEnrollmentRequests
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Developer enrollment requests returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperEnrollmentRequestListResponse'
+              examples:
+                default:
+                  value:
+                    requests:
+                      - requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                        applicantSubject: player-123
+                        applicantDisplayName: Player One
+                        applicantEmail: player1@boardtpl.local
+                        status: pending
+                        developerAccessEnabled: false
+                        requestedAt: '2026-03-03T20:15:00Z'
+                        reviewedAt: null
+                        reviewerSubject: null
+                      - requestId: 6c286ce9-22f1-4eff-b25f-58ff0120f539
+                        applicantSubject: player-456
+                        applicantDisplayName: Player Two
+                        applicantEmail: player2@boardtpl.local
+                        status: approved
+                        developerAccessEnabled: true
+                        requestedAt: '2026-03-02T18:10:00Z'
+                        reviewedAt: '2026-03-02T19:00:00Z'
+                        reviewerSubject: moderator-123
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have moderator access.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                forbidden:
+                  value:
+                    type: https://boardtpl.dev/problems/moderator_access_required
+                    title: Moderator access is required.
+                    status: 403
+                    detail: Only moderators can review developer enrollment requests.
+                    code: moderator_access_required
+  /moderation/developer-enrollment-requests/{requestId}/approve:
+    post:
+      tags: [Moderation]
+      summary: Approve a developer enrollment request
+      operationId: approveDeveloperEnrollmentRequest
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Developer enrollment request approved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperEnrollmentRequestResponse'
+              examples:
+                approved:
+                  value:
+                    developerEnrollmentRequest:
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      applicantSubject: player-123
+                      applicantDisplayName: Player One
+                      applicantEmail: player1@boardtpl.local
+                      status: approved
+                      developerAccessEnabled: true
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: '2026-03-03T21:05:00Z'
+                      reviewerSubject: moderator-123
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have moderator access.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                forbidden:
+                  value:
+                    type: https://boardtpl.dev/problems/moderator-access-required
+                    title: Moderator access is required.
+                    status: 403
+                    detail: Only moderators can review developer enrollment requests.
+                    code: moderator_access_required
+        '404':
+          description: Developer enrollment request not found.
+        '409':
+          description: Developer enrollment request has already been reviewed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not-pending:
+                  value:
+                    type: https://boardtpl.dev/problems/developer-enrollment-review-conflict
+                    title: Developer enrollment review conflict.
+                    status: 409
+                    detail: Only pending developer enrollment requests can be reviewed.
+                    code: developer_enrollment_review_conflict
         '502':
-          description: Keycloak developer enrollment failed upstream.
+          description: Keycloak developer role assignment failed upstream during approval.
           content:
             application/json:
               schema:
@@ -338,6 +558,74 @@ paths:
                     status: 502
                     detail: Keycloak role assignment failed for the authenticated user.
                     code: keycloak_developer_enrollment_failed
+  /moderation/developer-enrollment-requests/{requestId}/reject:
+    post:
+      tags: [Moderation]
+      summary: Reject a developer enrollment request
+      operationId: rejectDeveloperEnrollmentRequest
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Developer enrollment request rejected successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperEnrollmentRequestResponse'
+              examples:
+                rejected:
+                  value:
+                    developerEnrollmentRequest:
+                      requestId: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      applicantSubject: player-123
+                      applicantDisplayName: Player One
+                      applicantEmail: player1@boardtpl.local
+                      status: rejected
+                      developerAccessEnabled: false
+                      requestedAt: '2026-03-03T20:15:00Z'
+                      reviewedAt: '2026-03-03T21:05:00Z'
+                      reviewerSubject: moderator-123
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have moderator access.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                forbidden:
+                  value:
+                    type: https://boardtpl.dev/problems/moderator-access-required
+                    title: Moderator access is required.
+                    status: 403
+                    detail: Only moderators can review developer enrollment requests.
+                    code: moderator_access_required
+        '404':
+          description: Developer enrollment request not found.
+        '409':
+          description: Developer enrollment request has already been reviewed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not-pending:
+                  value:
+                    type: https://boardtpl.dev/problems/developer-enrollment-review-conflict
+                    title: Developer enrollment review conflict.
+                    status: 409
+                    detail: Only pending developer enrollment requests can be reviewed.
+                    code: developer_enrollment_review_conflict
   /identity/me/board-profile:
     get:
       tags: [Identity]
@@ -2843,23 +3131,81 @@ components:
             type: string
     DeveloperEnrollment:
       type: object
-      required: [status, developerAccessEnabled, alreadyEnabled, sessionRefreshRequired]
+      required: [status, developerAccessEnabled, canSubmitRequest]
       properties:
+        requestId:
+          type: string
+          format: uuid
+          nullable: true
         status:
           type: string
-          enum: [enabled]
+          enum: [not_requested, pending, approved, rejected]
         developerAccessEnabled:
           type: boolean
-        alreadyEnabled:
+        canSubmitRequest:
           type: boolean
-        sessionRefreshRequired:
-          type: boolean
+        requestedAt:
+          type: string
+          format: date-time
+          nullable: true
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        reviewerSubject:
+          type: string
+          nullable: true
     DeveloperEnrollmentResponse:
       type: object
       required: [developerEnrollment]
       properties:
         developerEnrollment:
           $ref: '#/components/schemas/DeveloperEnrollment'
+    DeveloperEnrollmentRequest:
+      type: object
+      required: [requestId, applicantSubject, status, developerAccessEnabled, requestedAt]
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        applicantSubject:
+          type: string
+        applicantDisplayName:
+          type: string
+          nullable: true
+        applicantEmail:
+          type: string
+          format: email
+          nullable: true
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        developerAccessEnabled:
+          type: boolean
+        requestedAt:
+          type: string
+          format: date-time
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        reviewerSubject:
+          type: string
+          nullable: true
+    DeveloperEnrollmentRequestListResponse:
+      type: object
+      required: [requests]
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeveloperEnrollmentRequest'
+    DeveloperEnrollmentRequestResponse:
+      type: object
+      required: [developerEnrollmentRequest]
+      properties:
+        developerEnrollmentRequest:
+          $ref: '#/components/schemas/DeveloperEnrollmentRequest'
     BoardProfile:
       type: object
       required: [boardUserId, displayName, linkedAt, lastSyncedAt]

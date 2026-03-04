@@ -89,7 +89,7 @@ python ./scripts/dev.py api-test --start-backend --skip-lint
 
 Important for live local runs:
 
-- the committed local environment file includes placeholders for `accessToken`, `organizationId`, `organizationSlug`, `titleId`, and `titleSlug`
+- the committed local environment file includes placeholders for `accessToken`, `moderatorAccessToken`, `developerEnrollmentRequestId`, `organizationId`, `organizationSlug`, `titleId`, and `titleSlug`
 - authenticated success-path requests for organization and Wave 3/Wave 4 title workflows are skipped until you replace those placeholders with real local values
 - this is expected; public routes and unauthenticated/error-path coverage still run with the committed template
 
@@ -170,7 +170,7 @@ Environment variables:
 
 - `Board Third Party Library - Mock` includes a non-secret placeholder `accessToken` (mock runs only need a non-empty value when forcing saved examples).
 - `Board Third Party Library - Mock` also includes `authCallbackCode` / `authCallbackState` values used by the saved callback example.
-- `Board Third Party Library - Local` includes `accessToken`, `authCallbackCode`, and `authCallbackState` placeholders that should be replaced with real values if you want to exercise the authenticated success-path requests against a live backend.
+- `Board Third Party Library - Local` includes `accessToken`, `moderatorAccessToken`, `developerEnrollmentRequestId`, `authCallbackCode`, and `authCallbackState` placeholders that should be replaced with real values if you want to exercise the authenticated success-path requests against a live backend.
 
 Security mock validation coverage is included for the current authenticated identity endpoints and exercises saved examples for:
 
@@ -192,7 +192,8 @@ The current implemented authentication surface is modeled as a Keycloak-hosted b
 - **Provider brokering**: optional `provider` query input on `GET /identity/auth/login` maps to Keycloak identity-provider hints for future social-login scenarios.
 - **Account lifecycle ownership**: password reset, email verification, and external identity linking are Keycloak concerns and are not modeled as first-party API endpoints in this contract.
 - **Wave 1 persistence**: `GET|PUT|DELETE /identity/me/board-profile` is part of the maintained contract and maps to the application-owned Board profile linkage/cache persisted in PostgreSQL.
-- **Developer enrollment**: `POST /identity/me/developer-enrollment` is a backend-mediated Keycloak role-grant workflow for the authenticated user; Keycloak remains the source of truth for the resulting `developer` role.
+- **Developer enrollment**: `GET|POST /identity/me/developer-enrollment` exposes request status for the authenticated user and lets a player submit a pending developer-registration request.
+- **Moderator review**: `GET /moderation/developer-enrollment-requests` plus `POST /moderation/developer-enrollment-requests/{requestId}/approve|reject` provide the moderator review workflow. Approval is backend-mediated and grants the Keycloak `developer` role only after review succeeds.
 
 ### Current catalog semantics (contract guidance)
 
