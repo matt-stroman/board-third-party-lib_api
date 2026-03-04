@@ -773,7 +773,6 @@
             }
           },
           "response": [
-            [
               {
                 "id": "cfe10d3e-8483-4390-81e2-785b1b9049b4",
                 "name": "default",
@@ -840,8 +839,6 @@
                 "cookie": [],
                 "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer token is required.\",\"code\":\"unauthorized\"}"
               }
-            ],
-            "Item"
           ]
         },
         {
@@ -1314,7 +1311,6 @@
             }
           },
           "response": [
-            [
               {
                 "id": "76dc0c01-1826-43f7-897a-45410bc6f2e6",
                 "name": "default",
@@ -1350,8 +1346,6 @@
                 "cookie": [],
                 "body": "{\"requests\":[{\"requestId\":\"2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af\",\"applicantSubject\":\"player-123\",\"applicantDisplayName\":\"Player One\",\"applicantEmail\":\"player1@boardtpl.local\",\"status\":\"pending_review\",\"actionRequiredBy\":\"moderator\",\"developerAccessEnabled\":false,\"requestedAt\":\"2026-03-03T20:15:00Z\",\"updatedAt\":\"2026-03-03T20:15:00Z\",\"reviewedAt\":null,\"reapplyAvailableAt\":null,\"reviewerSubject\":null},{\"requestId\":\"6c286ce9-22f1-4eff-b25f-58ff0120f539\",\"applicantSubject\":\"player-456\",\"applicantDisplayName\":\"Player Two\",\"applicantEmail\":\"player2@boardtpl.local\",\"status\":\"awaiting_applicant_response\",\"actionRequiredBy\":\"applicant\",\"developerAccessEnabled\":false,\"requestedAt\":\"2026-03-02T18:10:00Z\",\"updatedAt\":\"2026-03-02T19:00:00Z\",\"reviewedAt\":null,\"reapplyAvailableAt\":null,\"reviewerSubject\":null}]}"
               }
-            ],
-            "Item"
           ]
         }
       ]
