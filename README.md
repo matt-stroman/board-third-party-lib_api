@@ -192,6 +192,7 @@ The current implemented authentication surface is modeled as a Keycloak-hosted b
 - **Provider brokering**: optional `provider` query input on `GET /identity/auth/login` maps to Keycloak identity-provider hints for future social-login scenarios.
 - **Account lifecycle ownership**: password reset, email verification, and external identity linking are Keycloak concerns and are not modeled as first-party API endpoints in this contract.
 - **Wave 1 persistence**: `GET|PUT|DELETE /identity/me/board-profile` is part of the maintained contract and maps to the application-owned Board profile linkage/cache persisted in PostgreSQL.
+- **Developer enrollment**: `POST /identity/me/developer-enrollment` is a backend-mediated Keycloak role-grant workflow for the authenticated user; Keycloak remains the source of truth for the resulting `developer` role.
 
 ### Current catalog semantics (contract guidance)
 

@@ -11,4 +11,4 @@ Current planning artifacts:
 
 - [`catalog-browse-contract-draft.md`](catalog-browse-contract-draft.md)
 - [`initial-data-schema-plan.md`](initial-data-schema-plan.md)
-- [`player-library-and-developer-enrollment-contract-draft.md`](player-library-and-developer-enrollment-contract-draft.md)
+- [`player-library-and-wishlist-contract-draft.md`](player-library-and-wishlist-contract-draft.md)

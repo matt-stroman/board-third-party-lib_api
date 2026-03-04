@@ -1,4 +1,4 @@
-# Player Library And Developer Enrollment Contract Draft
+# Player Library And Wishlist Contract Draft
 
 ## Table of Contents
 
@@ -10,20 +10,22 @@
 
 ## Purpose
 
-This draft captures the next player-facing authenticated API surface without adding future-only endpoints to the maintained `v1` contract before backend implementation begins.
+This draft captures the next authenticated player-facing API surface without adding future-only endpoints to the maintained `v1` contract before backend implementation begins.
 
 Use this document to guide the later contract-first implementation of:
 
 - the authenticated player library
 - the authenticated wishlist
-- the separate post-sign-in developer enrollment step
+
+Developer enrollment is no longer part of this draft because it is now implemented in the maintained contract as `POST /identity/me/developer-enrollment`.
 
 ## Status
 
-Status on March 3, 2026:
+Status on March 4, 2026:
 
-- frontend routes now exist as visual stubs at `/player/library`, `/player/wishlist`, and `/account/developer-access`
-- backend implementation does not exist yet
+- frontend routes exist as visual stubs at `/player/library` and `/player/wishlist`
+- backend implementation for player library and wishlist does not exist yet
+- developer enrollment is implemented separately in the maintained contract
 - the maintained contract remains [`api/postman/specs/board-third-party-library-api.v1.openapi.yaml`](../postman/specs/board-third-party-library-api.v1.openapi.yaml)
 
 ## Draft Routes
@@ -36,7 +38,7 @@ Intended behavior:
 
 - return only the caller's private player-library data
 - include owned titles first
-- expose collection/favorite metadata when those features exist
+- expose collection and favorite metadata when those features exist
 
 ### `GET /player/wishlist`
 
@@ -47,16 +49,6 @@ Intended behavior:
 - return only the caller's private wishlist entries
 - reuse public catalog summary fields so wishlist cards can render without extra catalog fetches
 - support future sort modes such as `recentlyAdded`
-
-### `POST /identity/me/developer-enrollment`
-
-Authenticated developer-enrollment action that stays separate from account registration.
-
-Intended behavior:
-
-- allow a signed-in player to request or activate developer access
-- keep the exact approval model configurable for later policy decisions
-- return a player-facing status instead of raw identity-provider role details
 
 ## Draft Response Shapes
 
@@ -86,18 +78,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlayerWishlistResponse'
-  /identity/me/developer-enrollment:
-    post:
-      tags: [Identity]
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Developer enrollment state returned successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeveloperEnrollmentResponse'
 
 components:
   schemas:
@@ -152,23 +132,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CatalogTitleSummary'
-    DeveloperEnrollmentResponse:
-      type: object
-      required: [developerEnrollment]
-      properties:
-        developerEnrollment:
-          type: object
-          required: [status, developerAccessEnabled]
-          properties:
-            status:
-              type: string
-              enum: [notRequested, pendingReview, enabled]
-            developerAccessEnabled:
-              type: boolean
 ```
 
 ## Open Questions
 
-- whether developer enrollment is auto-approved or review-based
 - whether wishlist writes should live under `/player/wishlist` or under catalog title actions
 - whether player collections and favorites ship in the same backend wave as owned-title entitlements or immediately after

@@ -729,6 +729,195 @@
           ]
         },
         {
+          "name": "Enable developer access",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "var token = pm.environment.get(\"accessToken\") || \"\";",
+                  "var hasRealAccessToken = Boolean(token && token.indexOf(\"{{\") !== 0 && token.indexOf(\"replace-with-\") !== 0 && (mode === \"mock\" || token !== \"mock-access-token\"));",
+                  "if (mode !== \"mock\" && !hasRealAccessToken) {",
+                  "  pm.test(\"Enable developer access success flow skipped without bearer token\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Developer access is enabled\", function () { pm.expect(json.developerEnrollment.developerAccessEnabled).to.eql(true); });",
+                  "pm.test(\"Enrollment status is enabled\", function () { pm.expect(json.developerEnrollment.status).to.eql(\"enabled\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "9b9fceab-6f59-45e2-b1df-6144f2b76ec8",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/identity/me/developer-enrollment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "identity",
+                "me",
+                "developer-enrollment"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "1227f5a2-a77d-40a3-88aa-7bd539033c11",
+              "name": "enabled",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/developer-enrollment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "developer-enrollment"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"developerEnrollment\":{\"status\":\"enabled\",\"developerAccessEnabled\":true,\"alreadyEnabled\":false,\"sessionRefreshRequired\":true}}"
+            },
+            {
+              "id": "fd8152e4-72ed-4522-81c7-14b9fdd6f7f1",
+              "name": "already-enabled",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/developer-enrollment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "developer-enrollment"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"developerEnrollment\":{\"status\":\"enabled\",\"developerAccessEnabled\":true,\"alreadyEnabled\":true,\"sessionRefreshRequired\":false}}"
+            },
+            {
+              "id": "e4e66ffd-3666-4265-85c4-7bcc5a8ee545",
+              "name": "unauthorized",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/developer-enrollment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "developer-enrollment"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"A valid bearer token is required.\",\"code\":\"unauthorized\"}"
+            },
+            {
+              "id": "3a7e6761-5968-4f77-85fb-c8699fc9a4ff",
+              "name": "keycloak-admin-failure",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/developer-enrollment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "developer-enrollment"
+                  ]
+                }
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"type\":\"https://boardtpl.dev/problems/keycloak-developer-enrollment-failed\",\"title\":\"Developer enrollment could not be completed.\",\"status\":502,\"detail\":\"Keycloak role assignment failed for the authenticated user.\",\"code\":\"keycloak_developer_enrollment_failed\"}"
+            }
+          ]
+        },
+        {
           "name": "Get linked Board profile",
           "event": [
             {

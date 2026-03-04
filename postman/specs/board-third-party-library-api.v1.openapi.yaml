@@ -290,6 +290,54 @@ paths:
                     roles: [admin, developer, player]
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
+  /identity/me/developer-enrollment:
+    post:
+      tags: [Identity]
+      summary: Enable developer access for the current user
+      operationId: enrollCurrentUserAsDeveloper
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Developer access is enabled for the current user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperEnrollmentResponse'
+              examples:
+                enabled:
+                  value:
+                    developerEnrollment:
+                      status: enabled
+                      developerAccessEnabled: true
+                      alreadyEnabled: false
+                      sessionRefreshRequired: true
+                already-enabled:
+                  value:
+                    developerEnrollment:
+                      status: enabled
+                      developerAccessEnabled: true
+                      alreadyEnabled: true
+                      sessionRefreshRequired: false
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '502':
+          description: Keycloak developer enrollment failed upstream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                keycloak-admin-failure:
+                  value:
+                    type: https://boardtpl.dev/problems/keycloak-developer-enrollment-failed
+                    title: Developer enrollment could not be completed.
+                    status: 502
+                    detail: Keycloak role assignment failed for the authenticated user.
+                    code: keycloak_developer_enrollment_failed
   /identity/me/board-profile:
     get:
       tags: [Identity]
@@ -2793,6 +2841,25 @@ components:
           type: array
           items:
             type: string
+    DeveloperEnrollment:
+      type: object
+      required: [status, developerAccessEnabled, alreadyEnabled, sessionRefreshRequired]
+      properties:
+        status:
+          type: string
+          enum: [enabled]
+        developerAccessEnabled:
+          type: boolean
+        alreadyEnabled:
+          type: boolean
+        sessionRefreshRequired:
+          type: boolean
+    DeveloperEnrollmentResponse:
+      type: object
+      required: [developerEnrollment]
+      properties:
+        developerEnrollment:
+          $ref: '#/components/schemas/DeveloperEnrollment'
     BoardProfile:
       type: object
       required: [boardUserId, displayName, linkedAt, lastSyncedAt]
