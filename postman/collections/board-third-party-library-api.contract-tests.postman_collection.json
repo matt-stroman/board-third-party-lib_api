@@ -240,7 +240,7 @@
                 "exec": [
                   "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
                   "var json = pm.response.json();",
-                  "pm.test(\"Four platform roles are returned\", function () { pm.expect(json.roles.length).to.eql(4); });"
+                  "pm.test(\"Six platform roles are returned\", function () { pm.expect(json.roles.length).to.eql(6); });"
                 ]
               }
             }
@@ -291,7 +291,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\"roles\":[{\"code\":\"player\",\"displayName\":\"Player\",\"scope\":\"platform\"},{\"code\":\"developer\",\"displayName\":\"Developer\",\"scope\":\"platform\"},{\"code\":\"admin\",\"displayName\":\"Admin\",\"scope\":\"platform\"},{\"code\":\"moderator\",\"displayName\":\"Moderator\",\"scope\":\"platform\"}]}"
+              "body": "{\"roles\":[{\"code\":\"player\",\"displayName\":\"Player\",\"scope\":\"platform\"},{\"code\":\"developer\",\"displayName\":\"Developer\",\"scope\":\"platform\"},{\"code\":\"verified_developer\",\"displayName\":\"VerifiedDeveloper\",\"scope\":\"platform\"},{\"code\":\"super_admin\",\"displayName\":\"SuperAdmin\",\"scope\":\"platform\"},{\"code\":\"admin\",\"displayName\":\"Admin\",\"scope\":\"platform\"},{\"code\":\"moderator\",\"displayName\":\"Moderator\",\"scope\":\"platform\"}]}"
             }
           ]
         },
@@ -729,7 +729,7 @@
           ]
         },
         {
-          "name": "Get developer enrollment status",
+          "name": "Get developer access status",
           "event": [
             {
               "listen": "test",
@@ -739,10 +739,11 @@
                   "var m=(pm.environment.get(\"contractExecutionMode\")||\"live\").toLowerCase();",
                   "var t=pm.environment.get(\"accessToken\")||\"\";",
                   "var ok=Boolean(t&&t.indexOf(\"{{\")!==0&&t.indexOf(\"replace-with-\")!==0&&(m===\"mock\"||t!==\"mock-access-token\"));",
-                  "if(m!==\"mock\"&&!ok){pm.test(\"Get developer enrollment status skipped without bearer token\",function(){pm.expect(true).to.eql(true);});return;}",
+                  "if(m!==\"mock\"&&!ok){pm.test(\"Get developer access status skipped without bearer token\",function(){pm.expect(true).to.eql(true);});return;}",
                   "pm.test(\"Status is 200\",function(){pm.response.to.have.status(200);});",
                   "var j=pm.response.json();",
-                  "pm.test(\"Known status\",function(){pm.expect([\"not_requested\",\"pending_review\",\"awaiting_applicant_response\",\"approved\",\"rejected\",\"cancelled\"]).to.include(j.developerEnrollment.status);});"
+                  "pm.test(\"Known status\",function(){pm.expect([\"not_enrolled\",\"enrolled\"]).to.include(j.developerEnrollment.status);});",
+                  "pm.test(\"Verified flag exists\",function(){pm.expect(j.developerEnrollment.verifiedDeveloper).to.be.a(\"boolean\");});"
                 ]
               }
             }
@@ -807,7 +808,7 @@
                   }
                 ],
                 "cookie": [],
-                "body": "{\"developerEnrollment\":{\"requestId\":\"2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af\",\"status\":\"pending_review\",\"actionRequiredBy\":\"moderator\",\"developerAccessEnabled\":false,\"canSubmitRequest\":false,\"canCancelRequest\":true,\"canReply\":false,\"requestedAt\":\"2026-03-03T20:15:00Z\",\"updatedAt\":\"2026-03-03T20:15:00Z\",\"reviewedAt\":null,\"reapplyAvailableAt\":null,\"reviewerSubject\":null}}"
+                "body": "{\"developerEnrollment\":{\"status\":\"not_enrolled\",\"actionRequiredBy\":\"none\",\"developerAccessEnabled\":false,\"verifiedDeveloper\":false,\"canSubmitRequest\":true}}"
               },
               {
                 "id": "c8b70460-0b4c-4fe5-b282-ba2fb623e2c4",
@@ -1269,7 +1270,7 @@
       "name": "Moderation",
       "item": [
         {
-          "name": "List developer enrollment requests",
+          "name": "Grant verified developer role",
           "event": [
             {
               "listen": "test",
@@ -1279,9 +1280,10 @@
                   "var m=(pm.environment.get(\"contractExecutionMode\")||\"live\").toLowerCase();",
                   "var t=pm.environment.get(\"moderatorAccessToken\")||\"\";",
                   "var ok=Boolean(t&&t.indexOf(\"{{\")!==0&&t.indexOf(\"replace-with-\")!==0&&(m===\"mock\"||t!==\"mock-access-token\"));",
-                  "if(m!==\"mock\"&&!ok){pm.test(\"List requests skipped without moderator token\",function(){pm.expect(true).to.eql(true);});return;}",
+                  "if(m!==\"mock\"&&!ok){pm.test(\"Grant verified developer role skipped without moderator token\",function(){pm.expect(true).to.eql(true);});return;}",
                   "pm.test(\"Status is 200\",function(){pm.response.to.have.status(200);});",
-                  "pm.test(\"Requests returned\",function(){pm.expect(pm.response.json().requests).to.be.an(\"array\");});"
+                  "var j=pm.response.json();",
+                  "pm.test(\"Verified role granted\",function(){pm.expect(j.verifiedDeveloperRoleState.verifiedDeveloper).to.eql(true);});"
                 ]
               }
             }
@@ -1291,7 +1293,7 @@
             "disableBodyPruning": true
           },
           "request": {
-            "method": "GET",
+            "method": "PUT",
             "header": [
               {
                 "key": "Authorization",
@@ -1300,13 +1302,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/moderation/developer-enrollment-requests",
+              "raw": "{{baseUrl}}/moderation/developers/{{developerSubject}}/verified-developer",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "moderation",
-                "developer-enrollment-requests"
+                "developers",
+                "{{developerSubject}}",
+                "verified-developer"
               ]
             }
           },
@@ -1315,7 +1319,7 @@
                 "id": "76dc0c01-1826-43f7-897a-45410bc6f2e6",
                 "name": "default",
                 "originalRequest": {
-                  "method": "GET",
+                  "method": "PUT",
                   "header": [
                     {
                       "key": "Authorization",
@@ -1324,13 +1328,15 @@
                     }
                   ],
                   "url": {
-                    "raw": "{{baseUrl}}/moderation/developer-enrollment-requests",
+                    "raw": "{{baseUrl}}/moderation/developers/{{developerSubject}}/verified-developer",
                     "host": [
                       "{{baseUrl}}"
                     ],
                     "path": [
                       "moderation",
-                      "developer-enrollment-requests"
+                      "developers",
+                      "{{developerSubject}}",
+                      "verified-developer"
                     ]
                   }
                 },
@@ -1344,7 +1350,7 @@
                   }
                 ],
                 "cookie": [],
-                "body": "{\"requests\":[{\"requestId\":\"2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af\",\"applicantSubject\":\"player-123\",\"applicantDisplayName\":\"Player One\",\"applicantEmail\":\"player1@boardtpl.local\",\"status\":\"pending_review\",\"actionRequiredBy\":\"moderator\",\"developerAccessEnabled\":false,\"requestedAt\":\"2026-03-03T20:15:00Z\",\"updatedAt\":\"2026-03-03T20:15:00Z\",\"reviewedAt\":null,\"reapplyAvailableAt\":null,\"reviewerSubject\":null},{\"requestId\":\"6c286ce9-22f1-4eff-b25f-58ff0120f539\",\"applicantSubject\":\"player-456\",\"applicantDisplayName\":\"Player Two\",\"applicantEmail\":\"player2@boardtpl.local\",\"status\":\"awaiting_applicant_response\",\"actionRequiredBy\":\"applicant\",\"developerAccessEnabled\":false,\"requestedAt\":\"2026-03-02T18:10:00Z\",\"updatedAt\":\"2026-03-02T19:00:00Z\",\"reviewedAt\":null,\"reapplyAvailableAt\":null,\"reviewerSubject\":null}]}"
+                "body": "{\"verifiedDeveloperRoleState\":{\"developerSubject\":\"2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af\",\"verifiedDeveloper\":true,\"alreadyInRequestedState\":false}}"
               }
           ]
         }
