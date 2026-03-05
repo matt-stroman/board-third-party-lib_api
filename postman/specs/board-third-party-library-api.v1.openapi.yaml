@@ -292,6 +292,153 @@ paths:
                     roles: [admin, developer, player]
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
+  /identity/me/profile:
+    get:
+      tags: [Identity]
+      summary: Get application-managed profile details for the current user
+      operationId: getMyUserProfile
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Profile details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+              examples:
+                default:
+                  value:
+                    profile:
+                      subject: 5cfdbb44-2cf9-4aa2-b411-6c25b6690c4c
+                      displayName: Board Enthusiast
+                      userName: local-admin
+                      firstName: Local
+                      lastName: Admin
+                      email: admin@boardtpl.local
+                      emailVerified: true
+                      avatarUrl: null
+                      avatarDataUrl: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB
+                      initials: LA
+                      updatedAt: '2026-03-04T19:45:00Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+    put:
+      tags: [Identity]
+      summary: Update application-managed profile display name for the current user
+      operationId: updateMyUserProfile
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+            examples:
+              default:
+                value:
+                  displayName: Board Enthusiast
+      responses:
+        '200':
+          description: Profile details updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /identity/me/profile/avatar-url:
+    put:
+      tags: [Identity]
+      summary: Set a hosted avatar URL for the current user
+      operationId: setMyAvatarUrl
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAvatarUrlRequest'
+            examples:
+              default:
+                value:
+                  avatarUrl: https://cdn.example.com/avatars/boardfan.png
+      responses:
+        '200':
+          description: Avatar URL saved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /identity/me/profile/avatar-upload:
+    post:
+      tags: [Identity]
+      summary: Upload an avatar image for the current user
+      operationId: uploadMyAvatar
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadAvatarForm'
+      responses:
+        '200':
+          description: Avatar uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /identity/me/profile/avatar:
+    delete:
+      tags: [Identity]
+      summary: Remove any configured avatar for the current user
+      operationId: removeMyAvatar
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Avatar removed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
   /identity/me/developer-enrollment:
     get:
       tags: [Identity]
@@ -2614,6 +2761,85 @@ paths:
           description: Caller does not have permission to manage this title.
         '404':
           description: Title not found.
+  /developer/titles/{titleId}/media/{mediaRole}/upload:
+    post:
+      tags: [Catalog]
+      summary: Upload title media asset file
+      description: >
+        Uploads an image file for the specified media slot and upserts the corresponding title media asset.
+        Supported formats are JPEG, PNG, WEBP, and GIF with a maximum file size of 25 MB.
+      operationId: uploadTitleMediaAsset
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+        - name: titleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Title identifier.
+        - name: mediaRole
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/TitleMediaRole'
+          description: Media slot to create or replace.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadTitleMediaAssetForm'
+      responses:
+        '200':
+          description: Title media asset uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TitleMediaAssetResponse'
+              examples:
+                default:
+                  value:
+                    mediaAsset:
+                      id: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+                      mediaRole: hero
+                      sourceUrl: https://api.boardtpl.local/uploads/title-media/33333333-3333-3333-3333-333333333333/hero/20260304153030-aaaaaaaaaaaaaaaa.png
+                      altText: Hero art.
+                      mimeType: image/png
+                      width: null
+                      height: null
+                      createdAt: '2026-03-04T15:30:30Z'
+                      updatedAt: '2026-03-04T15:30:30Z'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this title.
+        '404':
+          description: Title not found.
+        '422':
+          description: Validation failed for the upload payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+              examples:
+                invalid-media-format:
+                  value:
+                    title: One or more validation errors occurred.
+                    status: 422
+                    errors:
+                      media:
+                        - Media image format must be JPEG, PNG, WEBP, or GIF.
+                media-too-large:
+                  value:
+                    title: One or more validation errors occurred.
+                    status: 422
+                    errors:
+                      media:
+                        - Media image size must be 25 MB or less.
   /developer/titles/{titleId}/media/{mediaRole}:
     put:
       tags: [Catalog]
@@ -3455,6 +3681,78 @@ components:
           type: array
           items:
             type: string
+    UserProfile:
+      type: object
+      required: [subject, emailVerified, initials, updatedAt]
+      properties:
+        subject:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        userName:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        emailVerified:
+          type: boolean
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        avatarDataUrl:
+          type: string
+          nullable: true
+        initials:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    UserProfileResponse:
+      type: object
+      required: [profile]
+      properties:
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          nullable: true
+    SetAvatarUrlRequest:
+      type: object
+      required: [avatarUrl]
+      properties:
+        avatarUrl:
+          type: string
+          format: uri
+    UploadAvatarForm:
+      type: object
+      required: [avatar]
+      properties:
+        avatar:
+          type: string
+          format: binary
+    UploadTitleMediaAssetForm:
+      type: object
+      required: [media]
+      properties:
+        media:
+          type: string
+          format: binary
+        altText:
+          type: string
+          nullable: true
     DeveloperEnrollment:
       type: object
       required: [status, actionRequiredBy, developerAccessEnabled, canSubmitRequest, canCancelRequest, canReply]

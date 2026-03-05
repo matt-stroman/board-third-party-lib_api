@@ -3818,6 +3818,257 @@
           ]
         },
         {
+          "name": "Upload title media asset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Upload title media asset skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Uploaded asset uses requested media role\", function () { pm.expect(json.mediaAsset.mediaRole).to.eql(\"hero\"); });",
+                  "pm.test(\"Uploaded asset returns URL\", function () { pm.expect(json.mediaAsset.sourceUrl).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "6d6a9fcf-323a-453c-91a8-658f89f930f9",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/developer/titles/33333333-3333-3333-3333-333333333333/media/hero/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "developer",
+                "titles",
+                "33333333-3333-3333-3333-333333333333",
+                "media",
+                "hero",
+                "upload"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "media",
+                  "type": "text",
+                  "value": "mock-binary-placeholder"
+                },
+                {
+                  "key": "altText",
+                  "type": "text",
+                  "value": "Hero art."
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "8a2f35bf-8272-44dd-bf0f-a09195fd75aa",
+              "name": "default",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/developer/titles/33333333-3333-3333-3333-333333333333/media/hero/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "developer",
+                    "titles",
+                    "33333333-3333-3333-3333-333333333333",
+                    "media",
+                    "hero",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "media",
+                      "type": "text",
+                      "value": "mock-binary-placeholder"
+                    },
+                    {
+                      "key": "altText",
+                      "type": "text",
+                      "value": "Hero art."
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"mediaAsset\":{\"id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\"mediaRole\":\"hero\",\"sourceUrl\":\"https://api.boardtpl.local/uploads/title-media/33333333-3333-3333-3333-333333333333/hero/20260304153030-aaaaaaaaaaaaaaaa.png\",\"altText\":\"Hero art.\",\"mimeType\":\"image/png\",\"width\":null,\"height\":null,\"createdAt\":\"2026-03-04T15:30:30Z\",\"updatedAt\":\"2026-03-04T15:30:30Z\"}}"
+            }
+          ]
+        },
+        {
+          "name": "Upload title media asset (Validation 422 example)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var mode = (pm.environment.get(\"contractExecutionMode\") || \"live\").toLowerCase();",
+                  "if (mode !== \"mock\") {",
+                  "  pm.test(\"Upload title media asset (Validation 422 example) skipped outside mock environment\", function () { pm.expect(true).to.eql(true); });",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Status is 422\", function () { pm.response.to.have.status(422); });",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Validation errors include media field\", function () { pm.expect(json.errors[\"media\"]).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "id": "e5ee6a15-05d4-4de0-9d9d-5d70ef3f8f67",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "422",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "title-media-upload-format-validation-error",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/developer/titles/33333333-3333-3333-3333-333333333333/media/card/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "developer",
+                "titles",
+                "33333333-3333-3333-3333-333333333333",
+                "media",
+                "card",
+                "upload"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "media",
+                  "type": "text",
+                  "value": "mock-binary-placeholder"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "c2a52584-b96b-450e-8cb6-dc5f49fc5edd",
+              "name": "title-media-upload-format-validation-error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{accessToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-mock-response-code",
+                    "value": "422",
+                    "type": "text"
+                  },
+                  {
+                    "key": "x-mock-response-name",
+                    "value": "title-media-upload-format-validation-error",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/developer/titles/33333333-3333-3333-3333-333333333333/media/card/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "developer",
+                    "titles",
+                    "33333333-3333-3333-3333-333333333333",
+                    "media",
+                    "card",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "media",
+                      "type": "text",
+                      "value": "mock-binary-placeholder"
+                    }
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\"title\":\"One or more validation errors occurred.\",\"status\":422,\"errors\":{\"media\":[\"Media image format must be JPEG, PNG, WEBP, or GIF.\"]}}"
+            }
+          ]
+        },
+        {
           "name": "Upsert title media asset (Validation 422 example)",
           "event": [
             {

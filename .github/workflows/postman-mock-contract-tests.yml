@@ -18,8 +18,8 @@ env:
   ADMIN_ENVIRONMENT_PATH: postman/environments/board-third-party-library_mock-admin.postman_environment.json
 
 jobs:
-  postman-cli-mock-tests:
-    name: Run Postman CLI mock contract tests
+  api-lint:
+    name: API Tests - Lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -39,6 +39,21 @@ jobs:
           --skip-rule no-server-example.com
           --skip-rule operation-4xx-response
           --skip-rule operation-2xx-response
+
+  postman-cli-mock-tests:
+    name: API Tests - Contract (Mock)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: api-lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Provision mock server for this run
         id: provision_mock
