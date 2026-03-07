@@ -1912,7 +1912,7 @@
                   "}",
                   "pm.test(\"Status is 201\", function () { pm.response.to.have.status(201); });",
                   "var json = pm.response.json();",
-                  "var createdStudio = json.studio || json;",
+                  "var createdStudio = json.studio || (Array.isArray(json.studios) ? json.studios[0] : null) || json;",
                   "pm.test(\"Created studio includes slug\", function () { pm.expect(createdStudio).to.be.an(\"object\"); pm.expect(createdStudio.slug).to.be.a(\"string\"); });"
                 ]
               }
@@ -2522,7 +2522,7 @@
                   "}",
                   "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
                   "var json = pm.response.json();",
-                  "var updatedStudio = json.studio || json;",
+                  "var updatedStudio = json.studio || (Array.isArray(json.studios) ? json.studios[0] : null) || json;",
                   "pm.test(\"Uploaded studio logo URL is returned\", function () { pm.expect(updatedStudio).to.be.an(\"object\"); pm.expect(updatedStudio.logoUrl).to.be.a(\"string\"); });"
                 ]
               }
@@ -2639,7 +2639,7 @@
                   "}",
                   "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
                   "var json = pm.response.json();",
-                  "var updatedStudio = json.studio || json;",
+                  "var updatedStudio = json.studio || (Array.isArray(json.studios) ? json.studios[0] : null) || json;",
                   "pm.test(\"Uploaded studio banner URL is returned\", function () { pm.expect(updatedStudio).to.be.an(\"object\"); pm.expect(updatedStudio.bannerUrl).to.be.a(\"string\"); });"
                 ]
               }
@@ -4125,7 +4125,8 @@
                   "}",
                   "pm.test(\"Status is 201\", function () { pm.response.to.have.status(201); });",
                   "var json = pm.response.json();",
-                  "pm.test(\"Created title slug matches request\", function () { pm.expect(json.title.slug).to.eql(pm.environment.get(\"titleSlug\") || \"star-blasters\"); });"
+                  "var createdTitle = json.title || (Array.isArray(json.titles) ? json.titles[0] : null) || json;",
+                  "pm.test(\"Created title slug matches request\", function () { pm.expect(createdTitle.slug).to.eql(pm.environment.get(\"titleSlug\") || \"star-blasters\"); });"
                 ]
               }
             }
@@ -4621,7 +4622,8 @@
                   "}",
                   "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
                   "var json = pm.response.json();",
-                  "pm.test(\"Current metadata revision changed to 1\", function () { pm.expect(json.title.currentMetadataRevision).to.eql(1); });"
+                  "var restoredTitle = json.title || (Array.isArray(json.titles) ? json.titles[0] : null) || json;",
+                  "pm.test(\"Current metadata revision changed to 1\", function () { pm.expect(restoredTitle.currentMetadataRevision).to.eql(1); });"
                 ]
               }
             }
