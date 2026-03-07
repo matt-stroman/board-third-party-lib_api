@@ -35,7 +35,7 @@ Do **not** use this document as the authoritative definition of current tables/c
 
 Current authoritative sources should be treated as:
 
-- API contract: [`api/postman/specs/board-third-party-library-api.v1.openapi.yaml`](../postman/specs/board-third-party-library-api.v1.openapi.yaml)
+- API contract: [`api/postman/specs/board-enthusiasts-api.v1.openapi.yaml`](../postman/specs/board-enthusiasts-api.v1.openapi.yaml)
 - Backend schema implementation plan (high-level implementation sequencing): [`backend/planning/mvp-schema-implementation-plan.md`](../../backend/planning/mvp-schema-implementation-plan.md)
 - Developer-facing data ownership guide: [`backend/docs/auth-data-ownership.md`](../../backend/docs/auth-data-ownership.md)
 - Implemented backend code/migrations (when present): backend EF Core model + migrations in the `backend` submodule

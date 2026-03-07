@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: Board Third Party Library API
+  title: Board Enthusiasts API
   version: 1.0.0-draft
   description: >
-    Contract-first API definition for the Board Third Party Library.
+    Contract-first API definition for the Board Enthusiasts.
     Authentication is delegated to Keycloak, so custom password,
     registration, email-verification, refresh-token, and external-identity
     management endpoints have been removed from this contract. Application-owned
@@ -44,7 +44,7 @@ paths:
               examples:
                 default:
                   value:
-                    service: board-third-party-lib-backend
+                    service: board-enthusiasts-backend
                     endpoints: [/health/live, /health/ready]
   /health/live:
     get:
@@ -159,13 +159,13 @@ paths:
               examples:
                 local:
                   value:
-                    issuer: https://localhost:8443/realms/board-third-party-library/
-                    authorizationEndpoint: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/auth
-                    tokenEndpoint: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/token
-                    logoutEndpoint: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/logout
-                    jwksUri: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/certs
-                    accountManagementUrl: https://localhost:8443/realms/board-third-party-library/account
-                    clientId: board-third-party-library-backend
+                    issuer: https://localhost:8443/realms/board-enthusiasts/
+                    authorizationEndpoint: https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/auth
+                    tokenEndpoint: https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/token
+                    logoutEndpoint: https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/logout
+                    jwksUri: https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/certs
+                    accountManagementUrl: https://localhost:8443/realms/board-enthusiasts/account
+                    clientId: board-enthusiasts-backend
                     callbackUrl: https://localhost:7085/identity/auth/callback
                     scopes: [openid, profile, email]
                     registrationEnabled: true
@@ -193,7 +193,7 @@ paths:
               schema:
                 type: string
                 format: uri
-              example: https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/auth?client_id=board-third-party-library-backend&redirect_uri=https%3A%2F%2Flocalhost%3A7085%2Fidentity%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email&state=st_mock_123&code_challenge=pkce_mock_123&code_challenge_method=S256
+              example: https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/auth?client_id=board-enthusiasts-backend&redirect_uri=https%3A%2F%2Flocalhost%3A7085%2Fidentity%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email&state=st_mock_123&code_challenge=pkce_mock_123&code_challenge_method=S256
   /identity/auth/callback:
     get:
       tags: [Identity]

@@ -5,9 +5,9 @@
   },
   "entities": {
     "environments": [
-      "../postman/environments/board-third-party-library_local.postman_environment.json",
-      "../postman/environments/board-third-party-library_mock.postman_environment.json",
-      "../postman/environments/board-third-party-library_mock-admin.postman_environment.json"
+      "../postman/environments/board-enthusiasts_local.postman_environment.json",
+      "../postman/environments/board-enthusiasts_mock.postman_environment.json",
+      "../postman/environments/board-enthusiasts_mock-admin.postman_environment.json"
     ],
     "flows": [],
     "globals": [
@@ -16,13 +16,13 @@
     "mocks": [],
     "specs": [
       {
-        "id": "board-third-party-library-api-v1",
-        "path": "../postman/specs/board-third-party-library-api.v1.openapi.yaml"
+        "id": "board-enthusiasts-api-v1",
+        "path": "../postman/specs/board-enthusiasts-api.v1.openapi.yaml"
       }
     ],
     "collections": [
-      "../postman/collections/board-third-party-library-api.contract-tests.postman_collection.json",
-      "../postman/collections/postman-admin.board-third-party-library-mock-provisioning.postman_collection.json"
+      "../postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json",
+      "../postman/collections/postman-admin.board-enthusiasts-mock-provisioning.postman_collection.json"
     ]
   }
 }

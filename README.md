@@ -1,6 +1,6 @@
-# board-third-party-lib_api
+# board-enthusiasts_api
 
-Design and tests for the API for the Board third party library.
+Design and tests for the API for the Board Enthusiasts.
 
 ## Table of Contents
 
@@ -27,11 +27,11 @@ This project uses a CLI-first workflow:
 ### Supported Model
 
 - Keep exactly one **Git-tracked test collection** in this repo:
-  - `postman/collections/board-third-party-library-api.contract-tests.postman_collection.json`
+  - `postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json`
 - Keep one separate **Git-tracked Postman admin collection** for Postman Cloud provisioning tasks (mock server setup, inspection):
-  - `postman/collections/postman-admin.board-third-party-library-mock-provisioning.postman_collection.json`
+  - `postman/collections/postman-admin.board-enthusiasts-mock-provisioning.postman_collection.json`
 - Keep the OpenAPI spec as the contract source of truth:
-  - `postman/specs/board-third-party-library-api.v1.openapi.yaml`
+  - `postman/specs/board-enthusiasts-api.v1.openapi.yaml`
 - Do not make contract validation, mock provisioning, or workspace sync depend on a generated collection.
 
 ### GitHub Automation
@@ -46,7 +46,7 @@ The maintained GitHub Actions workflow automates the important Postman checks an
 - `postman-workspace-sync.yml`
   - runs on `main`
   - pushes Native Git artifacts from this repo to the connected Postman workspace with `postman workspace push --yes`
-  - reprovisions the shared mock and syncs the `Board Third Party Library - Mock` environment `baseUrl`
+  - reprovisions the shared mock and syncs the `Board Enthusiasts - Mock` environment `baseUrl`
   - validates the synced workspace assets against that shared mock with Postman CLI
 
 This means normal team workflow does not require:
@@ -125,7 +125,7 @@ The `api` repository includes a GitHub Actions workflow that runs the Git-tracke
 
 - `POSTMAN_API_KEY`
 
-Use a Postman API key for an account (or service account) that has access to the workspace referenced by the Mock Admin environment (`workspaceId` in `postman/environments/board-third-party-library_mock-admin.postman_environment.json`).
+Use a Postman API key for an account (or service account) that has access to the workspace referenced by the Mock Admin environment (`workspaceId` in `postman/environments/board-enthusiasts_mock-admin.postman_environment.json`).
 
 No static mock URL secret is required.
 
@@ -134,7 +134,7 @@ No static mock URL secret is required.
 To avoid stale mock URLs and stale Postman collection snapshots, the workflow performs these steps during each run:
 
 1. Resolve the contract test collection in Postman using the Mock Admin environment metadata (name/ID).
-2. Update that Postman collection from the current repo file (`postman/collections/board-third-party-library-api.contract-tests.postman_collection.json`).
+2. Update that Postman collection from the current repo file (`postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json`).
 3. Create a fresh Postman mock server for the run and capture its `mockUrl`.
 4. Run Postman CLI against the repo-tracked collection using the generated `mockUrl` as `baseUrl`.
 5. Delete the CI-created mock server during cleanup (even if the contract run fails).
@@ -152,10 +152,10 @@ The contract test collection includes:
 
 ### Files used for mock-first work
 
-- `postman/environments/board-third-party-library_mock.postman_environment.json`
-- `postman/environments/board-third-party-library_mock-admin.postman_environment.json`
-- `postman/collections/postman-admin.board-third-party-library-mock-provisioning.postman_collection.json`
-- `postman/collections/board-third-party-library-api.contract-tests.postman_collection.json`
+- `postman/environments/board-enthusiasts_mock.postman_environment.json`
+- `postman/environments/board-enthusiasts_mock-admin.postman_environment.json`
+- `postman/collections/postman-admin.board-enthusiasts-mock-provisioning.postman_collection.json`
+- `postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json`
 
 ### Auth note for authenticated identity contract tests
 
@@ -168,9 +168,9 @@ The collection supports two execution modes:
 
 Environment variables:
 
-- `Board Third Party Library - Mock` includes a non-secret placeholder `accessToken` (mock runs only need a non-empty value when forcing saved examples).
-- `Board Third Party Library - Mock` also includes `authCallbackCode` / `authCallbackState` values used by the saved callback example.
-- `Board Third Party Library - Local` includes `accessToken`, `moderatorAccessToken`, `developerSubject`, `authCallbackCode`, and `authCallbackState` placeholders that should be replaced with real values if you want to exercise the authenticated success-path requests against a live backend.
+- `Board Enthusiasts - Mock` includes a non-secret placeholder `accessToken` (mock runs only need a non-empty value when forcing saved examples).
+- `Board Enthusiasts - Mock` also includes `authCallbackCode` / `authCallbackState` values used by the saved callback example.
+- `Board Enthusiasts - Local` includes `accessToken`, `moderatorAccessToken`, `developerSubject`, `authCallbackCode`, and `authCallbackState` placeholders that should be replaced with real values if you want to exercise the authenticated success-path requests against a live backend.
 
 Security mock validation coverage is included for the current authenticated identity endpoints and exercises saved examples for:
 
@@ -210,7 +210,7 @@ The current implemented authentication surface is modeled as a Keycloak-hosted b
 The mock server is provisioned from a Postman **workspace collection object** selected by the Mock Admin environment.
 
 Default:
-- `Board Third Party Library API (Contract Tests)`
+- `Board Enthusiasts API (Contract Tests)`
 
 Why:
 - this is the Git-tracked contract source used by CI and local CLI runs
@@ -218,34 +218,34 @@ Why:
 
 The Mock Admin environment controls which workspace collection is used as the mock source:
 
-- `mockSourceCollectionName` (default: `Board Third Party Library API (Contract Tests)`)
+- `mockSourceCollectionName` (default: `Board Enthusiasts API (Contract Tests)`)
 - `mockSourceCollectionPostmanId` (optional exact Postman collection ID override if duplicate collections exist)
 
 Leave the collection ID overrides blank by default. Postman collection IDs can change when workspace artifacts are regenerated or recreated, while name-based resolution remains stable for normal day-to-day mock provisioning.
 
-The supported stable setting is `Board Third Party Library API (Contract Tests)`.
+The supported stable setting is `Board Enthusiasts API (Contract Tests)`.
 
 1. In Postman, import/sync both environments:
-   - `Board Third Party Library - Mock` (day-to-day contract test runs)
-   - `Board Third Party Library - Mock Admin` (mock provisioning/maintenance)
-2. Select `Board Third Party Library - Mock Admin`.
+   - `Board Enthusiasts - Mock` (day-to-day contract test runs)
+   - `Board Enthusiasts - Mock Admin` (mock provisioning/maintenance)
+2. Select `Board Enthusiasts - Mock Admin`.
 3. Add your Postman API key to **Postman Vault** as `postman-api-key` (local secret), so the admin collection can use `{{vault:postman-api-key}}`.
 4. Enable Vault access for scripts (one-time Postman setup) and grant this collection/workspace access when prompted.
-6. Run `Postman Admin - Board Third Party Library Mock Provisioning`:
+6. Run `Postman Admin - Board Enthusiasts Mock Provisioning`:
    - `Collections / Provision/refresh mock server (one-step)`
 7. The collection test scripts will populate in the **Mock Admin** environment:
    - `mockSourceCollectionUid`
    - `mockId`
    - `mockUrl`
    - `baseUrl` (set to the created mock URL)
-8. The one-step admin request will also attempt to automatically sync `Board Third Party Library - Mock` `baseUrl` via the Postman API by resolving the runtime environment from `mockRuntimeEnvironmentName` on each run and then caching the current `mockRuntimeEnvironmentId`.
-9. Run `Board Third Party Library API (Contract Tests)` against `Board Third Party Library - Mock`.
+8. The one-step admin request will also attempt to automatically sync `Board Enthusiasts - Mock` `baseUrl` via the Postman API by resolving the runtime environment from `mockRuntimeEnvironmentName` on each run and then caching the current `mockRuntimeEnvironmentId`.
+9. Run `Board Enthusiasts API (Contract Tests)` against `Board Enthusiasts - Mock`.
 
 The one-step provisioning request performs a preflight validation of the resolved mock source collection snapshot (route presence + saved examples for currently required endpoints). If it fails, fix the mock source collection/workspace object first instead of trusting mock-based contract test failures.
 
 If the contract test run fails immediately with a `400` response whose body contains `inactiveMockError`, the environment is pointing at a deleted or replaced Postman mock. Refresh/pull the connected repository if needed, rerun `Provision/refresh mock server (one-step)`, and then rerun the contract tests.
 
-Important for local/manual runs: Postman uses your local environment variable value when you send requests in your own instance. The provisioning collection updates the Mock environment through the Postman API, which updates the shared environment value in the workspace. If you manually cleared `Board Third Party Library - Mock.baseUrl` locally, that blank local override will continue to win until you reset it back to the shared value. In that case, use `Reset value` on `baseUrl` (or `Reset all`) in the `Board Third Party Library - Mock` environment after provisioning.
+Important for local/manual runs: Postman uses your local environment variable value when you send requests in your own instance. The provisioning collection updates the Mock environment through the Postman API, which updates the shared environment value in the workspace. If you manually cleared `Board Enthusiasts - Mock.baseUrl` locally, that blank local override will continue to win until you reset it back to the shared value. In that case, use `Reset value` on `baseUrl` (or `Reset all`) in the `Board Enthusiasts - Mock` environment after provisioning.
 
 ### If runtime Mock environment auto-sync fails
 
@@ -271,13 +271,13 @@ These values are intentionally blank in the versioned **Mock Admin** environment
 
 ### Making the Mock environment "ready to go"
 
-The admin collection attempts to keep `Board Third Party Library - Mock` `baseUrl` in sync automatically whenever a new mock server is created.
+The admin collection attempts to keep `Board Enthusiasts - Mock` `baseUrl` in sync automatically whenever a new mock server is created.
 
 If your team decides to keep a stable mock URL for a while, you can also update the versioned runtime mock environment file:
 
-- `postman/environments/board-third-party-library_mock.postman_environment.json`
+- `postman/environments/board-enthusiasts_mock.postman_environment.json`
 
-Then most day-to-day work only needs the `Board Third Party Library - Mock` environment, and the `Mock Admin` environment/collection are only used when the mock server must be created or repaired.
+Then most day-to-day work only needs the `Board Enthusiasts - Mock` environment, and the `Mock Admin` environment/collection are only used when the mock server must be created or repaired.
 
 ### Mock response selection notes
 

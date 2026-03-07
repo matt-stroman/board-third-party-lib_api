@@ -202,13 +202,13 @@ async function main() {
   const preferredName =
     getEnvValue(adminEnvironment, "mockSourceCollectionName") ||
     getEnvValue(adminEnvironment, "contractTestsCollectionName") ||
-    "Board Third Party Library API (Contract Tests)";
+    "Board Enthusiasts API (Contract Tests)";
   const runtimeEnvironmentName =
     getEnvValue(adminEnvironment, "mockRuntimeEnvironmentName") ||
-    "Board Third Party Library - Mock";
+    "Board Enthusiasts - Mock";
   const runtimeEnvironmentId = getEnvValue(adminEnvironment, "mockRuntimeEnvironmentId");
   const baseMockServerName =
-    getEnvValue(adminEnvironment, "mockServerName") || "Board Third Party Library API Mock";
+    getEnvValue(adminEnvironment, "mockServerName") || "Board Enthusiasts API Mock";
   const mockServerName =
     mode === "ephemeral"
       ? `${baseMockServerName} (CI ${runId})`
