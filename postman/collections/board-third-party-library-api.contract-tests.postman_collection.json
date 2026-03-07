@@ -1028,22 +1028,12 @@
                 "value": "Bearer {{accessToken}}",
                 "type": "text"
               },
-            {
-              "key": "Content-Type",
-              "value": "application/json",
-              "type": "text"
-            },
-            {
-              "key": "x-mock-response-code",
-              "value": "201",
-              "type": "text"
-            },
-            {
-              "key": "x-mock-response-name",
-              "value": "default",
-              "type": "text"
-            }
-          ],
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"boardUserId\": \"board_user_12345\",\n  \"displayName\": \"BoardKiddo\",\n  \"avatarUrl\": \"https://cdn.board.fun/users/board_user_12345/avatar.png\"\n}"
@@ -1072,12 +1062,22 @@
                     "value": "Bearer {{accessToken}}",
                     "type": "text"
                   },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "x-mock-response-code",
+            "value": "201",
+            "type": "text"
+          },
+          {
+            "key": "x-mock-response-name",
+            "value": "default",
+            "type": "text"
+          }
+        ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"boardUserId\": \"board_user_12345\",\n  \"displayName\": \"BoardKiddo\",\n  \"avatarUrl\": \"https://cdn.board.fun/users/board_user_12345/avatar.png\"\n}"
@@ -1878,6 +1878,16 @@
               {
                 "key": "Content-Type",
                 "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-code",
+                "value": "201",
+                "type": "text"
+              },
+              {
+                "key": "x-mock-response-name",
+                "value": "default",
                 "type": "text"
               }
             ],
