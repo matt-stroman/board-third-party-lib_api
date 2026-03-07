@@ -74,17 +74,17 @@ Email management planning (important):
 - `users.id` remains the stable identity key
 - preferred model discussed: `user_email_addresses` (one-to-many, primary/verified status) rather than a single immutable `users.email`
 
-### Organizations (Developer Teams)
+### Studios (Developer Teams)
 
 Planned entities:
 
-- `organizations`
-- `organization_memberships`
+- `studios`
+- `studio_memberships`
 
 Notes:
 
 - org membership role was planned as a simpler scoped role for MVP (e.g. `owner`, `admin`, `editor`)
-- global platform roles and organization-scoped roles were intentionally kept separate
+- global platform roles and studio-scoped roles were intentionally kept separate
 
 ### Titles / Catalog Metadata (Versioned)
 
@@ -182,13 +182,13 @@ The initial media planning explicitly called out three image roles to mirror the
 Conceptually, the plan assumed relationships like:
 
 - `users` <-> `roles` via `user_roles`
-- `organizations` <-> `users` via `organization_memberships`
-- `organizations` -> `titles`
+- `studios` <-> `users` via `studio_memberships`
+- `studios` -> `titles`
 - `titles` -> `title_metadata_versions`
 - `titles` -> `title_releases`
 - `title_releases` -> `release_artifacts`
 - `titles` / `title_metadata_versions` -> `title_media_assets`
-- `organizations` -> `integration_connections`
+- `studios` -> `integration_connections`
 - `titles` <-> `integration_connections` via `title_integration_bindings`
 
 ## Wave Alignment
@@ -200,7 +200,7 @@ This initial plan was intended to align with the backend implementation waves ca
 High-level sequence discussed:
 
 1. Identity / roles
-2. Organizations / memberships
+2. Studios / memberships
 3. Titles / metadata versions
 4. Media / releases / artifacts
 5. Integrations
@@ -216,3 +216,4 @@ When using this document for context:
 - prefer current code/migrations over this document when conflicts exist
 
 If a future agent changes the domain model substantially, this file should generally remain unchanged (historical context), and new rationale should be documented in current, maintained docs instead.
+

@@ -21,8 +21,8 @@ tags:
     description: Keycloak-backed auth and current-user identity endpoints.
   - name: Moderation
     description: Moderator-and-above workflows for managing verified developer role assignments.
-  - name: Organizations
-    description: Public organization pages and authenticated organization management endpoints.
+  - name: Studios
+    description: Public studio pages and authenticated studio management endpoints.
   - name: Acquisition
     description: Supported publisher discovery plus authenticated publisher connection and acquisition binding endpoints.
   - name: Catalog
@@ -530,6 +530,119 @@ paths:
                     status: 502
                     detail: Keycloak role assignment failed for the authenticated user.
                     code: keycloak_developer_enrollment_failed
+  /moderation/developers:
+    get:
+      tags: [Moderation]
+      summary: List developer accounts for moderation workflows
+      operationId: listModerationDevelopers
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Developer list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModerationDeveloperListResponse'
+              examples:
+                default:
+                  value:
+                    developers:
+                      - developerSubject: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                        userName: bluefairydev
+                        displayName: Blue Fairy Dev
+                        email: bluefairydev@example.com
+                      - developerSubject: 6a563332-90af-4d25-a30d-aeab9731a5c5
+                        userName: stellarforge
+                        displayName: Stellar Forge
+                        email: stellarforge@example.com
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have moderation access.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                forbidden:
+                  value:
+                    type: https://boardtpl.dev/problems/moderator-access-required
+                    title: Moderator access is required.
+                    status: 403
+                    detail: Only moderators and above can view developer moderation tools.
+                    code: moderator_access_required
+  /moderation/developers/{developerIdentifier}/verification:
+    get:
+      tags: [Moderation]
+      summary: Get verification state for a developer account
+      operationId: getDeveloperVerificationState
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: developerIdentifier
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Username when available, otherwise a Keycloak subject.
+        - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
+        - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
+      responses:
+        '200':
+          description: Verification state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifiedDeveloperRoleStateResponse'
+              examples:
+                verified:
+                  value:
+                    verifiedDeveloperRoleState:
+                      developerSubject: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      verifiedDeveloper: true
+                      alreadyInRequestedState: false
+                not-verified:
+                  value:
+                    verifiedDeveloperRoleState:
+                      developerSubject: 2c54f9bb-1fdf-48e5-8cf0-a8b77f6174af
+                      verifiedDeveloper: false
+                      alreadyInRequestedState: false
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have moderation access.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                forbidden:
+                  value:
+                    type: https://boardtpl.dev/problems/moderator-access-required
+                    title: Moderator access is required.
+                    status: 403
+                    detail: Only moderators and above can manage verification state.
+                    code: moderator_access_required
+        '404':
+          description: Target developer was not found.
+        '502':
+          description: Verification lookup failed upstream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                keycloak-failure:
+                  value:
+                    type: https://boardtpl.dev/problems/keycloak-verified-developer-role-failed
+                    title: Verification lookup failed.
+                    status: 502
+                    detail: Keycloak role lookup failed for the target user.
+                    code: keycloak_verified_developer_role_failed
   /moderation/developers/{developerSubject}/verified-developer:
     put:
       tags: [Moderation]
@@ -543,7 +656,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Keycloak subject of the target developer.
+          description: Username when available, otherwise a Keycloak subject.
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
       responses:
@@ -604,7 +717,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Keycloak subject of the target developer.
+          description: Username when available, otherwise a Keycloak subject.
       responses:
         '200':
           description: Verified developer role state returned successfully.
@@ -757,37 +870,46 @@ paths:
                     status: 404
                     detail: No linked Board profile exists for the current user.
                     code: board_profile_not_linked
-  /organizations:
+  /studios:
     get:
-      tags: [Organizations]
-      summary: List public organizations
-      operationId: listOrganizations
+      tags: [Studios]
+      summary: List public studios
+      operationId: listStudios
       security: []
       responses:
         '200':
-          description: Public organizations returned successfully.
+          description: Public studios returned successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationListResponse'
+                $ref: '#/components/schemas/StudioListResponse'
               examples:
                 default:
                   value:
-                    organizations:
+                    studios:
                       - id: 11111111-1111-1111-1111-111111111111
                         slug: stellar-forge
                         displayName: Stellar Forge
                         description: Family co-op studio.
                         logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                        bannerUrl: https://cdn.example.com/orgs/stellar-forge-banner.png
+                        links:
+                          - id: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+                            label: Discord
+                            url: https://discord.gg/stellarforge
+                            createdAt: '2026-03-07T00:00:00Z'
+                            updatedAt: '2026-03-07T00:00:00Z'
                       - id: 22222222-2222-2222-2222-222222222222
                         slug: tabletop-sparks
                         displayName: Tabletop Sparks
                         description: Party game makers.
                         logoUrl: null
+                        bannerUrl: null
+                        links: []
     post:
-      tags: [Organizations]
-      summary: Create organization
-      operationId: createOrganization
+      tags: [Studios]
+      summary: Create studio
+      operationId: createStudio
       security:
         - BearerAuth: []
       parameters:
@@ -798,7 +920,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrganizationRequest'
+              $ref: '#/components/schemas/CreateStudioRequest'
             examples:
               default:
                 value:
@@ -806,30 +928,33 @@ paths:
                   displayName: Stellar Forge
                   description: Family co-op studio.
                   logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                  bannerUrl: https://cdn.example.com/orgs/stellar-forge-banner.png
       responses:
         '201':
-          description: Organization created successfully.
+          description: Studio created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationResponse'
+                $ref: '#/components/schemas/StudioResponse'
               examples:
                 default:
                   value:
-                    organization:
+                    studio:
                       id: 11111111-1111-1111-1111-111111111111
                       slug: stellar-forge
                       displayName: Stellar Forge
                       description: Family co-op studio.
                       logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                      bannerUrl: https://cdn.example.com/orgs/stellar-forge-banner.png
+                      links: []
                       createdAt: '2026-03-01T20:00:00Z'
                       updatedAt: '2026-03-01T20:00:00Z'
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to create organizations.
+          description: Caller does not have permission to create studios.
         '409':
-          description: Organization slug is already in use.
+          description: Studio slug is already in use.
           content:
             application/json:
               schema:
@@ -837,11 +962,11 @@ paths:
               examples:
                 slug-conflict:
                   value:
-                    type: https://boardtpl.dev/problems/organization-slug-conflict
-                    title: Organization already exists
+                    type: https://boardtpl.dev/problems/studio-slug-conflict
+                    title: Studio already exists
                     status: 409
-                    detail: The supplied organization slug is already in use.
-                    code: organization_slug_conflict
+                    detail: The supplied studio slug is already in use.
+                    code: studio_slug_conflict
         '422':
           description: Validation failed for the request payload.
           content:
@@ -857,11 +982,11 @@ paths:
                       slug: [Slug must contain only lowercase letters, numbers, and single hyphen separators.]
                       displayName: [Display name is required.]
                       logoUrl: [Logo URL must be an absolute URI.]
-  /organizations/{slug}:
+  /studios/{slug}:
     get:
-      tags: [Organizations]
-      summary: Get public organization details
-      operationId: getOrganizationBySlug
+      tags: [Studios]
+      summary: Get public studio details
+      operationId: getStudioBySlug
       security: []
       parameters:
         - name: slug
@@ -869,32 +994,39 @@ paths:
           required: true
           schema:
             type: string
-          description: Human-readable organization route key.
+          description: Human-readable studio route key.
       responses:
         '200':
-          description: Organization details returned successfully.
+          description: Studio details returned successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationResponse'
+                $ref: '#/components/schemas/StudioResponse'
               examples:
                 default:
                   value:
-                    organization:
+                    studio:
                       id: 11111111-1111-1111-1111-111111111111
                       slug: stellar-forge
                       displayName: Stellar Forge
                       description: Family co-op studio.
                       logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                      bannerUrl: https://cdn.example.com/orgs/stellar-forge-banner.png
+                      links:
+                        - id: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+                          label: Discord
+                          url: https://discord.gg/stellarforge
+                          createdAt: '2026-03-07T00:00:00Z'
+                          updatedAt: '2026-03-07T00:00:00Z'
                       createdAt: '2026-03-01T20:00:00Z'
                       updatedAt: '2026-03-01T20:00:00Z'
         '404':
-          description: Organization not found.
-  /developer/organizations:
+          description: Studio not found.
+  /developer/studios:
     get:
-      tags: [Organizations]
-      summary: List organizations the caller can manage
-      operationId: listManagedOrganizations
+      tags: [Studios]
+      summary: List studios the caller can manage
+      operationId: listManagedStudios
       security:
         - BearerAuth: []
       parameters:
@@ -902,44 +1034,53 @@ paths:
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
       responses:
         '200':
-          description: Developer-visible organizations returned successfully.
+          description: Developer-visible studios returned successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeveloperOrganizationListResponse'
+                $ref: '#/components/schemas/DeveloperStudioListResponse'
               examples:
                 default:
                   value:
-                    organizations:
+                    studios:
                       - id: 11111111-1111-1111-1111-111111111111
                         slug: stellar-forge
                         displayName: Stellar Forge
                         description: Family co-op studio.
                         logoUrl: https://cdn.example.com/orgs/stellar-forge.png
+                        bannerUrl: https://cdn.example.com/orgs/stellar-forge-banner.png
+                        links:
+                          - id: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+                            label: Discord
+                            url: https://discord.gg/stellarforge
+                            createdAt: '2026-03-07T00:00:00Z'
+                            updatedAt: '2026-03-07T00:00:00Z'
                         role: owner
                       - id: 22222222-2222-2222-2222-222222222222
                         slug: tabletop-sparks
                         displayName: Tabletop Sparks
                         description: Party game makers.
                         logoUrl: null
+                        bannerUrl: null
+                        links: []
                         role: editor
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
-  /developer/organizations/{organizationId}:
+  /developer/studios/{studioId}:
     put:
-      tags: [Organizations]
-      summary: Update organization
-      operationId: updateOrganization
+      tags: [Studios]
+      summary: Update studio
+      operationId: updateStudio
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
       requestBody:
@@ -947,7 +1088,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationRequest'
+              $ref: '#/components/schemas/UpdateStudioRequest'
             examples:
               default:
                 value:
@@ -955,21 +1096,22 @@ paths:
                   displayName: Stellar Forge Studio
                   description: Updated studio description.
                   logoUrl: https://cdn.example.com/orgs/stellar-forge-studio.png
+                  bannerUrl: https://cdn.example.com/orgs/stellar-forge-studio-banner.png
       responses:
         '200':
-          description: Organization updated successfully.
+          description: Studio updated successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationResponse'
+                $ref: '#/components/schemas/StudioResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage this organization.
+          description: Caller does not have permission to manage this studio.
         '404':
-          description: Organization not found.
+          description: Studio not found.
         '409':
-          description: Organization slug is already in use.
+          description: Studio slug is already in use.
           content:
             application/json:
               schema:
@@ -981,66 +1123,284 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationProblemDetails'
     delete:
-      tags: [Organizations]
-      summary: Delete organization
-      operationId: deleteOrganization
+      tags: [Studios]
+      summary: Delete studio
+      operationId: deleteStudio
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
       responses:
         '204':
-          description: Organization deleted successfully.
+          description: Studio deleted successfully.
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to delete this organization.
+          description: Caller does not have permission to delete this studio.
         '404':
-          description: Organization not found.
-  /developer/organizations/{organizationId}/memberships:
+          description: Studio not found.
+  /developer/studios/{studioId}/links:
     get:
-      tags: [Organizations]
-      summary: List organization memberships
-      operationId: listOrganizationMemberships
+      tags: [Studios]
+      summary: List public links for a managed studio
+      operationId: listStudioLinks
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
+      responses:
+        '200':
+          description: Studio links returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioLinkListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this studio.
+        '404':
+          description: Studio not found.
+    post:
+      tags: [Studios]
+      summary: Create a public studio link
+      operationId: createStudioLink
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: studioId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Studio identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertStudioLinkRequest'
+      responses:
+        '201':
+          description: Studio link created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioLinkResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this studio.
+        '404':
+          description: Studio not found.
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /developer/studios/{studioId}/links/{linkId}:
+    put:
+      tags: [Studios]
+      summary: Update a public studio link
+      operationId: updateStudioLink
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: studioId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: linkId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertStudioLinkRequest'
+      responses:
+        '200':
+          description: Studio link updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioLinkResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this studio.
+        '404':
+          description: Studio or link not found.
+        '422':
+          description: Validation failed for the request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+    delete:
+      tags: [Studios]
+      summary: Delete a public studio link
+      operationId: deleteStudioLink
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: studioId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: linkId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Studio link deleted successfully.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this studio.
+        '404':
+          description: Studio or link not found.
+  /developer/studios/{studioId}/logo-upload:
+    post:
+      tags: [Studios]
+      summary: Upload a studio logo image
+      operationId: uploadStudioLogo
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: studioId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadStudioMediaForm'
+      responses:
+        '200':
+          description: Studio logo uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this studio.
+        '404':
+          description: Studio not found.
+        '422':
+          description: Validation failed for the upload payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /developer/studios/{studioId}/banner-upload:
+    post:
+      tags: [Studios]
+      summary: Upload a studio banner image
+      operationId: uploadStudioBanner
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: studioId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadStudioMediaForm'
+      responses:
+        '200':
+          description: Studio banner uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblemResponse'
+        '403':
+          description: Caller does not have permission to manage this studio.
+        '404':
+          description: Studio not found.
+        '422':
+          description: Validation failed for the upload payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblemDetails'
+  /developer/studios/{studioId}/memberships:
+    get:
+      tags: [Studios]
+      summary: List studio memberships
+      operationId: listStudioMemberships
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: studioId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Studio identifier.
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
       responses:
         '200':
-          description: Organization memberships returned successfully.
+          description: Studio memberships returned successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationMembershipListResponse'
+                $ref: '#/components/schemas/StudioMembershipListResponse'
               examples:
                 default:
                   value:
                     memberships:
-                      - organizationId: 11111111-1111-1111-1111-111111111111
+                      - studioId: 11111111-1111-1111-1111-111111111111
                         keycloakSubject: owner-123
                         displayName: Owner User
                         email: owner@boardtpl.local
                         role: owner
                         joinedAt: '2026-03-01T20:00:00Z'
                         updatedAt: '2026-03-01T20:00:00Z'
-                      - organizationId: 11111111-1111-1111-1111-111111111111
+                      - studioId: 11111111-1111-1111-1111-111111111111
                         keycloakSubject: editor-456
                         displayName: Editor User
                         email: editor@boardtpl.local
@@ -1050,24 +1410,24 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to view memberships for this organization.
+          description: Caller does not have permission to view memberships for this studio.
         '404':
-          description: Organization not found.
-  /developer/organizations/{organizationId}/memberships/{memberKeycloakSubject}:
+          description: Studio not found.
+  /developer/studios/{studioId}/memberships/{memberKeycloakSubject}:
     put:
-      tags: [Organizations]
-      summary: Add or update organization membership
-      operationId: upsertOrganizationMembership
+      tags: [Studios]
+      summary: Add or update studio membership
+      operationId: upsertStudioMembership
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
         - name: memberKeycloakSubject
           in: path
           required: true
@@ -1081,23 +1441,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertOrganizationMembershipRequest'
+              $ref: '#/components/schemas/UpsertStudioMembershipRequest'
             examples:
               default:
                 value:
                   role: editor
       responses:
         '200':
-          description: Organization membership created or updated successfully.
+          description: Studio membership created or updated successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationMembershipResponse'
+                $ref: '#/components/schemas/StudioMembershipResponse'
               examples:
                 default:
                   value:
                     membership:
-                      organizationId: 11111111-1111-1111-1111-111111111111
+                      studioId: 11111111-1111-1111-1111-111111111111
                       keycloakSubject: editor-456
                       displayName: Editor User
                       email: editor@boardtpl.local
@@ -1107,9 +1467,9 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage memberships for this organization.
+          description: Caller does not have permission to manage memberships for this studio.
         '404':
-          description: Organization or target user not found.
+          description: Studio or target user not found.
           content:
             application/json:
               schema:
@@ -1117,11 +1477,11 @@ paths:
               examples:
                 target-user-not-found:
                   value:
-                    type: https://boardtpl.dev/problems/organization-member-target-not-found
+                    type: https://boardtpl.dev/problems/studio-member-target-not-found
                     title: Target user not found
                     status: 404
                     detail: No local user projection exists for the supplied Keycloak subject.
-                    code: organization_member_target_not_found
+                    code: studio_member_target_not_found
         '409':
           description: Membership change would remove the last owner.
           content:
@@ -1131,11 +1491,11 @@ paths:
               examples:
                 owner-conflict:
                   value:
-                    type: https://boardtpl.dev/problems/organization-last-owner-conflict
-                    title: Organization owner conflict
+                    type: https://boardtpl.dev/problems/studio-last-owner-conflict
+                    title: Studio owner conflict
                     status: 409
-                    detail: The last organization owner cannot be removed or downgraded.
-                    code: organization_last_owner_conflict
+                    detail: The last studio owner cannot be removed or downgraded.
+                    code: studio_last_owner_conflict
         '422':
           description: Validation failed for the request payload.
           content:
@@ -1143,19 +1503,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationProblemDetails'
     delete:
-      tags: [Organizations]
-      summary: Remove organization membership
-      operationId: deleteOrganizationMembership
+      tags: [Studios]
+      summary: Remove studio membership
+      operationId: deleteStudioMembership
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
         - name: memberKeycloakSubject
           in: path
           required: true
@@ -1166,13 +1526,13 @@ paths:
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
       responses:
         '204':
-          description: Organization membership removed successfully.
+          description: Studio membership removed successfully.
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage memberships for this organization.
+          description: Caller does not have permission to manage memberships for this studio.
         '404':
-          description: Organization or membership not found.
+          description: Studio or membership not found.
         '409':
           description: Membership removal would remove the last owner.
           content:
@@ -1182,11 +1542,11 @@ paths:
               examples:
                 owner-conflict:
                   value:
-                    type: https://boardtpl.dev/problems/organization-last-owner-conflict
-                    title: Organization owner conflict
+                    type: https://boardtpl.dev/problems/studio-last-owner-conflict
+                    title: Studio owner conflict
                     status: 409
-                    detail: The last organization owner cannot be removed or downgraded.
-                    code: organization_last_owner_conflict
+                    detail: The last studio owner cannot be removed or downgraded.
+                    code: studio_last_owner_conflict
   /catalog:
     get:
       tags: [Catalog]
@@ -1197,12 +1557,12 @@ paths:
       operationId: listCatalogTitles
       security: []
       parameters:
-        - name: organizationSlug
+        - name: studioSlug
           in: query
           required: false
           schema:
             type: string
-          description: Optional organization route key filter.
+          description: Optional studio route key filter.
         - name: contentKind
           in: query
           required: false
@@ -1254,8 +1614,8 @@ paths:
                   value:
                     titles:
                       - id: 33333333-3333-3333-3333-333333333333
-                        organizationId: 11111111-1111-1111-1111-111111111111
-                        organizationSlug: stellar-forge
+                        studioId: 11111111-1111-1111-1111-111111111111
+                        studioSlug: stellar-forge
                         slug: star-blasters
                         contentKind: game
                         lifecycleStatus: testing
@@ -1323,7 +1683,7 @@ paths:
                         key: humble-bundle
                         displayName: Humble Bundle
                         homepageUrl: https://www.humblebundle.com/
-  /developer/organizations/{organizationId}/integration-connections:
+  /developer/studios/{studioId}/integration-connections:
     get:
       tags: [Acquisition]
       summary: List integration connections
@@ -1331,13 +1691,13 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
       responses:
         '200':
           description: Integration connections returned successfully.
@@ -1350,7 +1710,7 @@ paths:
                   value:
                     integrationConnections:
                       - id: 66666666-6666-6666-6666-666666666666
-                        organizationId: 11111111-1111-1111-1111-111111111111
+                        studioId: 11111111-1111-1111-1111-111111111111
                         supportedPublisherId: 44444444-4444-4444-4444-444444444444
                         supportedPublisher:
                           id: 44444444-4444-4444-4444-444444444444
@@ -1361,7 +1721,7 @@ paths:
                         createdAt: '2026-03-02T20:00:00Z'
                         updatedAt: '2026-03-02T20:00:00Z'
                       - id: 77777777-7777-7777-7777-777777777777
-                        organizationId: 11111111-1111-1111-1111-111111111111
+                        studioId: 11111111-1111-1111-1111-111111111111
                         customPublisherDisplayName: Stellar Forge Direct
                         customPublisherHomepageUrl: https://store.stellar-forge.example/
                         isEnabled: true
@@ -1370,9 +1730,9 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage integration connections for this organization.
+          description: Caller does not have permission to manage integration connections for this studio.
         '404':
-          description: Organization not found.
+          description: Studio not found.
     post:
       tags: [Acquisition]
       summary: Create integration connection
@@ -1382,13 +1742,13 @@ paths:
       parameters:
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
       requestBody:
         required: true
         content:
@@ -1419,9 +1779,9 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage integration connections for this organization.
+          description: Caller does not have permission to manage integration connections for this studio.
         '404':
-          description: Organization or supported publisher not found.
+          description: Studio or supported publisher not found.
         '422':
           description: Validation failed for the request payload.
           content:
@@ -1436,7 +1796,7 @@ paths:
                     errors:
                       publisher:
                         - Choose either a supported publisher or custom publisher details, but not both.
-  /developer/organizations/{organizationId}/integration-connections/{connectionId}:
+  /developer/studios/{studioId}/integration-connections/{connectionId}:
     get:
       tags: [Acquisition]
       summary: Get integration connection
@@ -1444,7 +1804,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
@@ -1466,9 +1826,9 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage integration connections for this organization.
+          description: Caller does not have permission to manage integration connections for this studio.
         '404':
-          description: Organization or integration connection not found.
+          description: Studio or integration connection not found.
     put:
       tags: [Acquisition]
       summary: Update integration connection
@@ -1478,7 +1838,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
@@ -1506,9 +1866,9 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage integration connections for this organization.
+          description: Caller does not have permission to manage integration connections for this studio.
         '404':
-          description: Organization, integration connection, or supported publisher not found.
+          description: Studio, integration connection, or supported publisher not found.
         '422':
           description: Validation failed for the request payload.
           content:
@@ -1522,7 +1882,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
@@ -1540,9 +1900,9 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage integration connections for this organization.
+          description: Caller does not have permission to manage integration connections for this studio.
         '404':
-          description: Organization or integration connection not found.
+          description: Studio or integration connection not found.
         '409':
           description: Integration connection cannot be deleted while it is still referenced by title bindings.
           content:
@@ -1557,7 +1917,7 @@ paths:
                     status: 409
                     detail: The integration connection is still referenced by one or more title acquisition bindings.
                     code: integration_connection_in_use
-  /catalog/{organizationSlug}/{titleSlug}:
+  /catalog/{studioSlug}/{titleSlug}:
     get:
       tags: [Catalog]
       summary: Get public catalog title details
@@ -1567,18 +1927,18 @@ paths:
       operationId: getCatalogTitle
       security: []
       parameters:
-        - name: organizationSlug
+        - name: studioSlug
           in: path
           required: true
           schema:
             type: string
-          description: Organization route key.
+          description: Studio route key.
         - name: titleSlug
           in: path
           required: true
           schema:
             type: string
-          description: Title route key unique within the organization.
+          description: Title route key unique within the studio.
       responses:
         '200':
           description: Public catalog title returned successfully.
@@ -1591,8 +1951,8 @@ paths:
                   value:
                     title:
                       id: 33333333-3333-3333-3333-333333333333
-                      organizationId: 11111111-1111-1111-1111-111111111111
-                      organizationSlug: stellar-forge
+                      studioId: 11111111-1111-1111-1111-111111111111
+                      studioSlug: stellar-forge
                       slug: star-blasters
                       contentKind: game
                       lifecycleStatus: testing
@@ -1721,13 +2081,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               examples:
-                cross-organization:
+                cross-studio:
                   value:
-                    type: https://boardtpl.dev/problems/title-integration-organization-conflict
+                    type: https://boardtpl.dev/problems/title-integration-studio-conflict
                     title: Title integration conflict
                     status: 409
-                    detail: The supplied integration connection must belong to the same organization as the title.
-                    code: title_integration_organization_conflict
+                    detail: The supplied integration connection must belong to the same studio as the title.
+                    code: title_integration_studio_conflict
                 primary-required:
                   value:
                     type: https://boardtpl.dev/problems/title-integration-primary-required
@@ -1875,24 +2235,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
-  /developer/organizations/{organizationId}/titles:
+  /developer/studios/{studioId}/titles:
     get:
       tags: [Catalog]
-      summary: List organization titles
-      operationId: listOrganizationTitles
+      summary: List studio titles
+      operationId: listStudioTitles
       security:
         - BearerAuth: []
       parameters:
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
       responses:
         '200':
-          description: Organization titles returned successfully.
+          description: Studio titles returned successfully.
           content:
             application/json:
               schema:
@@ -1902,8 +2262,8 @@ paths:
                   value:
                     titles:
                       - id: 33333333-3333-3333-3333-333333333333
-                        organizationId: 11111111-1111-1111-1111-111111111111
-                        organizationSlug: stellar-forge
+                        studioId: 11111111-1111-1111-1111-111111111111
+                        studioSlug: stellar-forge
                         slug: star-blasters
                         contentKind: game
                         lifecycleStatus: testing
@@ -1922,9 +2282,9 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to manage titles for this organization.
+          description: Caller does not have permission to manage titles for this studio.
         '404':
-          description: Organization not found.
+          description: Studio not found.
     post:
       tags: [Catalog]
       summary: Create title
@@ -1934,13 +2294,13 @@ paths:
       parameters:
         - $ref: '#/components/parameters/PostmanMockResponseCodeHeader'
         - $ref: '#/components/parameters/PostmanMockResponseNameHeader'
-        - name: organizationId
+        - name: studioId
           in: path
           required: true
           schema:
             type: string
             format: uuid
-          description: Organization identifier.
+          description: Studio identifier.
       requestBody:
         required: true
         content:
@@ -1976,8 +2336,8 @@ paths:
                   value:
                     title:
                       id: 33333333-3333-3333-3333-333333333333
-                      organizationId: 11111111-1111-1111-1111-111111111111
-                      organizationSlug: stellar-forge
+                      studioId: 11111111-1111-1111-1111-111111111111
+                      studioSlug: stellar-forge
                       slug: star-blasters
                       contentKind: game
                       lifecycleStatus: draft
@@ -2000,11 +2360,11 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedProblemResponse'
         '403':
-          description: Caller does not have permission to create titles for this organization.
+          description: Caller does not have permission to create titles for this studio.
         '404':
-          description: Organization not found.
+          description: Studio not found.
         '409':
-          description: Title slug is already in use within the organization.
+          description: Title slug is already in use within the studio.
           content:
             application/json:
               schema:
@@ -2015,7 +2375,7 @@ paths:
                     type: https://boardtpl.dev/problems/title-slug-conflict
                     title: Title already exists
                     status: 409
-                    detail: The supplied title slug is already in use within the organization.
+                    detail: The supplied title slug is already in use within the studio.
                     code: title_slug_conflict
         '422':
           description: Validation failed for the request payload.
@@ -2094,7 +2454,7 @@ paths:
         '404':
           description: Title not found.
         '409':
-          description: Title slug is already in use within the organization.
+          description: Title slug is already in use within the studio.
           content:
             application/json:
               schema:
@@ -3319,6 +3679,29 @@ components:
       properties:
         developerEnrollment:
           $ref: '#/components/schemas/DeveloperEnrollment'
+    ModerationDeveloperSummary:
+      type: object
+      required: [developerSubject]
+      properties:
+        developerSubject:
+          type: string
+        userName:
+          type: string
+          nullable: true
+        displayName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+    ModerationDeveloperListResponse:
+      type: object
+      required: [developers]
+      properties:
+        developers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModerationDeveloperSummary'
     VerifiedDeveloperRoleState:
       type: object
       required: [developerSubject, verifiedDeveloper, alreadyInRequestedState]
@@ -3371,7 +3754,7 @@ components:
           type: string
           format: uri
           nullable: true
-    OrganizationSummary:
+    StudioSummary:
       type: object
       required: [id, slug, displayName]
       properties:
@@ -3389,9 +3772,17 @@ components:
           type: string
           format: uri
           nullable: true
-    Organization:
+        bannerUrl:
+          type: string
+          format: uri
+          nullable: true
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudioLink'
+    Studio:
       allOf:
-        - $ref: '#/components/schemas/OrganizationSummary'
+        - $ref: '#/components/schemas/StudioSummary'
         - type: object
           required: [createdAt, updatedAt]
           properties:
@@ -3401,37 +3792,37 @@ components:
             updatedAt:
               type: string
               format: date-time
-    DeveloperOrganizationSummary:
+    DeveloperStudioSummary:
       allOf:
-        - $ref: '#/components/schemas/OrganizationSummary'
+        - $ref: '#/components/schemas/StudioSummary'
         - type: object
           required: [role]
           properties:
             role:
               type: string
-    OrganizationListResponse:
+    StudioListResponse:
       type: object
-      required: [organizations]
+      required: [studios]
       properties:
-        organizations:
+        studios:
           type: array
           items:
-            $ref: '#/components/schemas/OrganizationSummary'
-    DeveloperOrganizationListResponse:
+            $ref: '#/components/schemas/StudioSummary'
+    DeveloperStudioListResponse:
       type: object
-      required: [organizations]
+      required: [studios]
       properties:
-        organizations:
+        studios:
           type: array
           items:
-            $ref: '#/components/schemas/DeveloperOrganizationSummary'
-    OrganizationResponse:
+            $ref: '#/components/schemas/DeveloperStudioSummary'
+    StudioResponse:
       type: object
-      required: [organization]
+      required: [studio]
       properties:
-        organization:
-          $ref: '#/components/schemas/Organization'
-    CreateOrganizationRequest:
+        studio:
+          $ref: '#/components/schemas/Studio'
+    CreateStudioRequest:
       type: object
       required: [slug, displayName]
       properties:
@@ -3446,14 +3837,66 @@ components:
           type: string
           format: uri
           nullable: true
-    UpdateOrganizationRequest:
+        bannerUrl:
+          type: string
+          format: uri
+          nullable: true
+    UpdateStudioRequest:
       allOf:
-        - $ref: '#/components/schemas/CreateOrganizationRequest'
-    OrganizationMembership:
+        - $ref: '#/components/schemas/CreateStudioRequest'
+    UpsertStudioLinkRequest:
       type: object
-      required: [organizationId, keycloakSubject, role, joinedAt, updatedAt]
+      required: [label, url]
       properties:
-        organizationId:
+        label:
+          type: string
+        url:
+          type: string
+          format: uri
+    StudioLink:
+      type: object
+      required: [id, label, url, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+        url:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    StudioLinkListResponse:
+      type: object
+      required: [links]
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudioLink'
+    StudioLinkResponse:
+      type: object
+      required: [link]
+      properties:
+        link:
+          $ref: '#/components/schemas/StudioLink'
+    UploadStudioMediaForm:
+      type: object
+      required: [media]
+      properties:
+        media:
+          type: string
+          format: binary
+    StudioMembership:
+      type: object
+      required: [studioId, keycloakSubject, role, joinedAt, updatedAt]
+      properties:
+        studioId:
           type: string
           format: uuid
         keycloakSubject:
@@ -3473,21 +3916,21 @@ components:
         updatedAt:
           type: string
           format: date-time
-    OrganizationMembershipListResponse:
+    StudioMembershipListResponse:
       type: object
       required: [memberships]
       properties:
         memberships:
           type: array
           items:
-            $ref: '#/components/schemas/OrganizationMembership'
-    OrganizationMembershipResponse:
+            $ref: '#/components/schemas/StudioMembership'
+    StudioMembershipResponse:
       type: object
       required: [membership]
       properties:
         membership:
-          $ref: '#/components/schemas/OrganizationMembership'
-    UpsertOrganizationMembershipRequest:
+          $ref: '#/components/schemas/StudioMembership'
+    UpsertStudioMembershipRequest:
       type: object
       required: [role]
       properties:
@@ -3759,12 +4202,12 @@ components:
           nullable: true
     IntegrationConnection:
       type: object
-      required: [id, organizationId, isEnabled, createdAt, updatedAt]
+      required: [id, studioId, isEnabled, createdAt, updatedAt]
       properties:
         id:
           type: string
           format: uuid
-        organizationId:
+        studioId:
           type: string
           format: uuid
         supportedPublisherId:
@@ -3812,7 +4255,7 @@ components:
     UpdateIntegrationConnectionRequest:
       allOf:
         - $ref: '#/components/schemas/CreateIntegrationConnectionRequest'
-      description: Request payload for updating an organization-scoped integration connection.
+      description: Request payload for updating a studio-scoped integration connection.
     IntegrationConnectionListResponse:
       type: object
       required: [integrationConnections]
@@ -3900,15 +4343,15 @@ components:
     CatalogTitleSummary:
       type: object
       description: Public-facing summary for a catalog title.
-      required: [id, organizationId, organizationSlug, slug, contentKind, lifecycleStatus, visibility, currentMetadataRevision, displayName, shortDescription, genreDisplay, minPlayers, maxPlayers, playerCountDisplay, ageRatingAuthority, ageRatingValue, minAgeYears, ageDisplay]
+      required: [id, studioId, studioSlug, slug, contentKind, lifecycleStatus, visibility, currentMetadataRevision, displayName, shortDescription, genreDisplay, minPlayers, maxPlayers, playerCountDisplay, ageRatingAuthority, ageRatingValue, minAgeYears, ageDisplay]
       properties:
         id:
           type: string
           format: uuid
-        organizationId:
+        studioId:
           type: string
           format: uuid
-        organizationSlug:
+        studioSlug:
           type: string
         slug:
           type: string
@@ -4184,4 +4627,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+
+
 

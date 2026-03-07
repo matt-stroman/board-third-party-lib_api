@@ -23,7 +23,7 @@ The next browse contract iteration should support:
 
 The maintained `GET /catalog` contract currently supports only:
 
-- `organizationSlug`
+- `studioSlug`
 - `contentKind`
 
 It does not currently model:
@@ -41,7 +41,7 @@ Proposed route remains:
 
 ### Proposed query parameters
 
-- `organizationSlug`
+- `studioSlug`
   - existing parameter, unchanged
 - `contentKind`
   - existing parameter, unchanged
@@ -82,8 +82,8 @@ Retain the existing `titles` array and add paging metadata.
   "titles": [
     {
       "id": "33333333-3333-3333-3333-333333333333",
-      "organizationId": "11111111-1111-1111-1111-111111111111",
-      "organizationSlug": "stellar-forge",
+      "studioId": "11111111-1111-1111-1111-111111111111",
+      "studioSlug": "stellar-forge",
       "slug": "star-blasters",
       "contentKind": "game",
       "lifecycleStatus": "testing",
@@ -110,7 +110,7 @@ Retain the existing `titles` array and add paging metadata.
   "hasPreviousPage": false,
   "hasNextPage": true,
   "appliedFilters": {
-    "organizationSlug": null,
+    "studioSlug": null,
     "contentKind": "game",
     "genre": "Arcade Shooter",
     "sortBy": "genre",
@@ -178,7 +178,7 @@ components:
     CatalogAppliedFilters:
       type: object
       properties:
-        organizationSlug:
+        studioSlug:
           type: string
           nullable: true
         contentKind:
@@ -250,3 +250,4 @@ When public library implementation reaches the point where these controls are ne
 2. update the Git-tracked Postman contract test collection
 3. add failing backend tests
 4. implement backend query behavior
+

@@ -89,8 +89,8 @@ python ./scripts/dev.py api-test --start-backend --skip-lint
 
 Important for live local runs:
 
-- the committed local environment file includes placeholders for `accessToken`, `moderatorAccessToken`, `developerSubject`, `organizationId`, `organizationSlug`, `titleId`, and `titleSlug`
-- authenticated success-path requests for organization and Wave 3/Wave 4 title workflows are skipped until you replace those placeholders with real local values
+- the committed local environment file includes placeholders for `accessToken`, `moderatorAccessToken`, `developerSubject`, `studioId`, `studioSlug`, `titleId`, and `titleSlug`
+- authenticated success-path requests for studio and Wave 3/Wave 4 title workflows are skipped until you replace those placeholders with real local values
 - this is expected; public routes and unauthenticated/error-path coverage still run with the committed template
 
 If you want to run spec lint locally through the root CLI, run:
@@ -197,7 +197,7 @@ The current implemented authentication surface is modeled as a Keycloak-hosted b
 
 ### Current catalog semantics (contract guidance)
 
-- **Storefront routing**: public title detail uses `/catalog/{organizationSlug}/{titleSlug}` rather than a bare title ID.
+- **Storefront routing**: public title detail uses `/catalog/{studioSlug}/{titleSlug}` rather than a bare title ID.
 - **Lifecycle vs visibility**: `lifecycleStatus` and `visibility` are intentionally separate so testing titles can be public or hidden without changing their lifecycle phase.
 - **Visibility behavior**: `listed` titles appear in public catalog browse results, `unlisted` titles are reachable by direct route key only, and `private` titles are not publicly reachable.
 - **Metadata history**: title metadata remains mutable while a title is `draft`; once it leaves draft, metadata revisions are preserved as history and later edits create new revisions.
@@ -304,3 +304,5 @@ Then most day-to-day work only needs the `Board Third Party Library - Mock` envi
 - Git-tracked collections are for executable tests and workflow assertions.
 - Keep Postman Cloud admin/provisioning requests in a separate collection from API contract tests.
 - Keep filenames stable once Postman Native Git is tracking them to avoid duplicate workspace artifacts.
+
+
