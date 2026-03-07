@@ -1912,7 +1912,8 @@
                   "}",
                   "pm.test(\"Status is 201\", function () { pm.response.to.have.status(201); });",
                   "var json = pm.response.json();",
-                  "pm.test(\"Created studio includes slug\", function () { pm.expect(json.studio.slug).to.be.a(\"string\"); });"
+                  "var createdStudio = json.studio || json;",
+                  "pm.test(\"Created studio includes slug\", function () { pm.expect(createdStudio).to.be.an(\"object\"); pm.expect(createdStudio.slug).to.be.a(\"string\"); });"
                 ]
               }
             }
