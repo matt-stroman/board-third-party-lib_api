@@ -1,8 +1,8 @@
-# Board Third Party Library API (Postman API-First)
+# Board Enthusiasts API (Postman API-First)
 
 ## Purpose
 
-This submodule is the API-first design workspace for the Board Third Party Library.
+This submodule is the API-first design workspace for the Board Enthusiasts.
 
 It is intended to be the versioned home for:
 

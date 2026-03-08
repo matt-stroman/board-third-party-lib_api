@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 function getArgValue(name, defaultValue = "") {
   const index = process.argv.indexOf(name);
@@ -22,6 +23,37 @@ function writeGithubOutput(key, value) {
 function getEnvValue(envJson, key) {
   const found = (envJson.values || []).find((value) => value && value.key === key);
   return typeof found?.value === "string" ? found.value.trim() : "";
+}
+
+function uniqueNonEmpty(values) {
+  return [...new Set(values.filter((value) => typeof value === "string" && value.trim().length > 0))];
+}
+
+function buildNameCandidates(preferredName) {
+  if (!preferredName) {
+    return [];
+  }
+
+  return uniqueNonEmpty([preferredName.trim()]);
+}
+
+function resolveEntityByIdOrName(entities, preferredId, preferredName) {
+  const candidateNames = buildNameCandidates(preferredName);
+  let entity = null;
+
+  if (preferredId) {
+    entity = entities.find((candidate) => candidate && String(candidate.id || "") === preferredId) || null;
+  }
+
+  if (!entity && candidateNames.length > 0) {
+    entity =
+      entities.find((candidate) => candidate && candidateNames.includes(String(candidate.name || ""))) || null;
+  }
+
+  return {
+    entity,
+    candidateNames
+  };
 }
 
 function stripPostmanIds(value) {
@@ -122,9 +154,11 @@ async function syncRuntimeEnvironmentBaseUrl(apiBase, apiKey, runtimeEnvironment
     });
 
     const environments = Array.isArray(payload.environments) ? payload.environments : [];
-    const match = environments.find((environment) => environment && environment.name === runtimeEnvironmentName);
+    const { entity: match, candidateNames } = resolveEntityByIdOrName(environments, "", runtimeEnvironmentName);
     if (!match?.id) {
-      throw new Error(`Unable to resolve runtime mock environment: ${runtimeEnvironmentName}`);
+      throw new Error(
+        `Unable to resolve runtime mock environment by name candidates: ${candidateNames.join(", ") || runtimeEnvironmentName}.`,
+      );
     }
 
     resolvedEnvironmentId = String(match.id);
@@ -202,13 +236,13 @@ async function main() {
   const preferredName =
     getEnvValue(adminEnvironment, "mockSourceCollectionName") ||
     getEnvValue(adminEnvironment, "contractTestsCollectionName") ||
-    "Board Third Party Library API (Contract Tests)";
+    "Board Enthusiasts API (Contract Tests)";
   const runtimeEnvironmentName =
     getEnvValue(adminEnvironment, "mockRuntimeEnvironmentName") ||
-    "Board Third Party Library - Mock";
+    "Board Enthusiasts - Mock";
   const runtimeEnvironmentId = getEnvValue(adminEnvironment, "mockRuntimeEnvironmentId");
   const baseMockServerName =
-    getEnvValue(adminEnvironment, "mockServerName") || "Board Third Party Library API Mock";
+    getEnvValue(adminEnvironment, "mockServerName") || "Board Enthusiasts API Mock";
   const mockServerName =
     mode === "ephemeral"
       ? `${baseMockServerName} (CI ${runId})`
@@ -233,18 +267,16 @@ async function main() {
   });
 
   const collections = Array.isArray(collectionListPayload.collections) ? collectionListPayload.collections : [];
-  let targetCollection = null;
-
-  if (preferredPostmanId) {
-    targetCollection = collections.find((collection) => collection && String(collection.id || "") === preferredPostmanId) || null;
-  }
-
-  if (!targetCollection && preferredName) {
-    targetCollection = collections.find((collection) => collection && collection.name === preferredName) || null;
-  }
+  const { entity: targetCollection, candidateNames } = resolveEntityByIdOrName(
+    collections,
+    preferredPostmanId,
+    preferredName,
+  );
 
   if (!targetCollection?.uid) {
-    throw new Error(`Unable to resolve Postman collection by id="${preferredPostmanId}" name="${preferredName}".`);
+    throw new Error(
+      `Unable to resolve Postman collection by id="${preferredPostmanId}" name candidates="${candidateNames.join(", ")}".`,
+    );
   }
 
   const localCollection = stripPostmanIds(JSON.parse(fs.readFileSync(collectionPath, "utf8")));
@@ -294,7 +326,11 @@ async function main() {
   }, null, 2));
 }
 
-main().catch((error) => {
-  console.error(error?.stack || error);
-  process.exit(1);
-});
+export { buildNameCandidates, resolveEntityByIdOrName };
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    console.error(error?.stack || error);
+    process.exit(1);
+  });
+}

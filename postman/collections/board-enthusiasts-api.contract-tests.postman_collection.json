@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "f50dd41b-3551-4df0-bd49-7f943f5a4fc1",
-    "name": "Board Third Party Library API (Contract Tests)",
+    "name": "Board Enthusiasts API (Contract Tests)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -61,7 +61,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\"service\":\"board-third-party-lib-backend\",\"endpoints\":[\"/health/live\",\"/health/ready\"]}"
+              "body": "{\"service\":\"board-enthusiasts-backend\",\"endpoints\":[\"/health/live\",\"/health/ready\"]}"
             }
           ]
         },
@@ -358,7 +358,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\"issuer\":\"https://localhost:8443/realms/board-third-party-library/\",\"authorizationEndpoint\":\"https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/auth\",\"tokenEndpoint\":\"https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/token\",\"logoutEndpoint\":\"https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/logout\",\"jwksUri\":\"https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/certs\",\"accountManagementUrl\":\"https://localhost:8443/realms/board-third-party-library/account\",\"clientId\":\"board-third-party-library-backend\",\"callbackUrl\":\"https://localhost:7085/identity/auth/callback\",\"scopes\":[\"openid\",\"profile\",\"email\"],\"registrationEnabled\":true,\"externalIdentityProviders\":[]}"
+              "body": "{\"issuer\":\"https://localhost:8443/realms/board-enthusiasts/\",\"authorizationEndpoint\":\"https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/auth\",\"tokenEndpoint\":\"https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/token\",\"logoutEndpoint\":\"https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/logout\",\"jwksUri\":\"https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/certs\",\"accountManagementUrl\":\"https://localhost:8443/realms/board-enthusiasts/account\",\"clientId\":\"board-enthusiasts-backend\",\"callbackUrl\":\"https://localhost:7085/identity/auth/callback\",\"scopes\":[\"openid\",\"profile\",\"email\"],\"registrationEnabled\":true,\"externalIdentityProviders\":[]}"
             }
           ]
         },
@@ -432,7 +432,7 @@
               "header": [
                 {
                   "key": "Location",
-                  "value": "https://localhost:8443/realms/board-third-party-library/protocol/openid-connect/auth?client_id=board-third-party-library-backend&redirect_uri=https%3A%2F%2Flocalhost%3A7085%2Fidentity%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email&state=st_mock_123&code_challenge=pkce_mock_123&code_challenge_method=S256&kc_idp_hint=github"
+                  "value": "https://localhost:8443/realms/board-enthusiasts/protocol/openid-connect/auth?client_id=board-enthusiasts-backend&redirect_uri=https%3A%2F%2Flocalhost%3A7085%2Fidentity%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email&state=st_mock_123&code_challenge=pkce_mock_123&code_challenge_method=S256&kc_idp_hint=github"
                 }
               ],
               "cookie": [],
@@ -752,7 +752,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "8147ab8f-b53f-477b-9c2d-8cab5f38a184"
         },
         {
           "name": "Mark current user notification read",
@@ -780,7 +781,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "1564f618-4c7a-446e-8170-dac27d8cffee"
         },
         {
           "name": "Get developer access status",
@@ -1671,7 +1673,8 @@
             }
           ]
         }
-      ]
+      ],
+      "id": "8aa157eb-7a29-4521-af28-c9889b1349ef"
     },
     {
       "name": "Studios",
@@ -3820,7 +3823,8 @@
             }
           ]
         }
-      ]
+      ],
+      "id": "36a23057-f78e-4cad-8a60-063caefbb72c"
     },
     {
       "name": "Catalog",
@@ -7892,7 +7896,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "5e124f84-542c-43b3-b0b9-3036a21560a2"
         },
         {
           "name": "Add Player Library Title",
@@ -7916,7 +7921,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "b942979a-9d54-4f69-9191-d9e70ecf74ac"
         },
         {
           "name": "Remove Player Library Title",
@@ -7940,7 +7946,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "ca6b447a-2c2e-439d-a09f-0935d2fb29d0"
         },
         {
           "name": "Get Player Wishlist",
@@ -7962,7 +7969,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "e904986d-e090-4273-b640-bfe74e3ebb94"
         },
         {
           "name": "Add Player Wishlist Title",
@@ -7986,7 +7994,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "803866a0-0b68-4f5e-bdac-cf13a43d00f2"
         },
         {
           "name": "Remove Player Wishlist Title",
@@ -8010,7 +8019,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "5faccdad-8045-4707-bb1a-6a3feaa1fa2c"
         },
         {
           "name": "Get Player Reports",
@@ -8032,7 +8042,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "e81fa798-52d4-4093-a4d5-dce77b67d8c0"
         },
         {
           "name": "Create Player Report",
@@ -8063,7 +8074,8 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "id": "ab2909d1-57e7-4b77-8da9-0a56dee4cf78"
         },
         {
           "name": "Get Player Report Detail",
@@ -8086,7 +8098,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "38dc1b03-3b45-422f-8962-0bf36a053f8a"
         },
         {
           "name": "Add Player Report Message",
@@ -8119,9 +8132,11 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "id": "aa4bbb12-7211-41e2-9eb7-8a4de5d1171d"
         }
-      ]
+      ],
+      "id": "5ad262d0-9e77-4c0a-bf4e-d0d25b5c3f6f"
     },
     {
       "name": "Title Reports",
@@ -8146,7 +8161,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "e6d7bc61-b151-45e6-8dd5-c2bf072486ac"
         },
         {
           "name": "Get Moderation Title Report Detail",
@@ -8169,7 +8185,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "9ede9a2c-4cb1-4a0a-9d9b-9f4a27b869a9"
         },
         {
           "name": "Add Moderation Title Report Message",
@@ -8202,7 +8219,8 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "id": "f8b899b6-639c-4e5c-b872-7983ea7ff2e2"
         },
         {
           "name": "Validate Moderation Title Report",
@@ -8235,7 +8253,8 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "id": "95d1a931-4958-4b28-ae1c-4115ccf45faa"
         },
         {
           "name": "Invalidate Moderation Title Report",
@@ -8268,7 +8287,8 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "id": "c66c5458-d611-4a98-b548-90e2acaaa5a8"
         },
         {
           "name": "Get Developer Title Reports",
@@ -8292,7 +8312,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "2603c0a6-25c5-4d40-84c1-e7a600878bd0"
         },
         {
           "name": "Get Developer Title Report Detail",
@@ -8317,7 +8338,8 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "id": "0ae857c8-37cb-46b4-bfc0-a9aad293dd90"
         },
         {
           "name": "Add Developer Title Report Message",
@@ -8352,9 +8374,11 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "id": "4386f336-c894-4c1c-ad49-f68cfb10d993"
         }
-      ]
+      ],
+      "id": "50afc9e6-f222-4226-8f63-9e57170a5749"
     }
   ],
   "event": [

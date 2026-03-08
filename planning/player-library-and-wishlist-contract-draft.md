@@ -26,7 +26,7 @@ Status on March 4, 2026:
 - frontend routes exist as visual stubs at `/player/library` and `/player/wishlist`
 - backend implementation for player library and wishlist does not exist yet
 - developer enrollment is implemented separately in the maintained contract
-- the maintained contract remains [`api/postman/specs/board-third-party-library-api.v1.openapi.yaml`](../postman/specs/board-third-party-library-api.v1.openapi.yaml)
+- the maintained contract remains [`api/postman/specs/board-enthusiasts-api.v1.openapi.yaml`](../postman/specs/board-enthusiasts-api.v1.openapi.yaml)
 
 ## Draft Routes
 

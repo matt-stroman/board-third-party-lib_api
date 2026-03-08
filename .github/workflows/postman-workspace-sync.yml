@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  COLLECTION_PATH: postman/collections/board-third-party-library-api.contract-tests.postman_collection.json
-  ADMIN_ENVIRONMENT_PATH: postman/environments/board-third-party-library_mock-admin.postman_environment.json
+  COLLECTION_PATH: postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json
+  ADMIN_ENVIRONMENT_PATH: postman/environments/board-enthusiasts_mock-admin.postman_environment.json
   POSTMAN_CLI_VERSION: 1.29.5
 
 jobs:
@@ -78,8 +78,8 @@ jobs:
       - name: Validate synced mock with Postman CLI
         run: |
           mkdir -p postman-cli-reports
-          postman collection run postman/collections/board-third-party-library-api.contract-tests.postman_collection.json \
-            --environment postman/environments/board-third-party-library_mock.postman_environment.json \
+          postman collection run postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json \
+            --environment postman/environments/board-enthusiasts_mock.postman_environment.json \
             --env-var baseUrl=${{ steps.provision_shared_mock.outputs.base_url }} \
             --env-var contractExecutionMode=mock \
             --bail failure \

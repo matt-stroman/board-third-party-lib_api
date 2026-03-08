@@ -9,13 +9,13 @@ id = b5ab66e4-6132-4d90-8e71-2e43f0aea926
 
 [config.relations.collections]
 rootDirectory = postman/collections
-files[] = {"id":"3468151-7811f0fe-a206-44d0-abd0-91718b3b13b5","path":"Board Third Party Library API (Generated, API Builder).json","metaData":{}}
+files[] = {"id":"3468151-7811f0fe-a206-44d0-abd0-91718b3b13b5","path":"Board Enthusiasts API (Generated, API Builder).json","metaData":{}}
 
 [config.relations.collections.metaData]
 
 [config.relations.apiDefinition]
-files[] = {"path":"postman/specs/board-third-party-library-api.v1.openapi.yaml","metaData":{}}
+files[] = {"path":"postman/specs/board-enthusiasts-api.v1.openapi.yaml","metaData":{}}
 
 [config.relations.apiDefinition.metaData]
 type = openapi:3
-rootFiles[] = postman/specs/board-third-party-library-api.v1.openapi.yaml
+rootFiles[] = postman/specs/board-enthusiasts-api.v1.openapi.yaml

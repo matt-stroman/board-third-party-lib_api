@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "2105612e-4326-4774-9d9e-fefa6f9767a9",
-    "name": "Postman Admin - Board Third Party Library Mock Provisioning",
-    "description": "Provision and inspect the Postman mock server for the Board Third Party Library contract tests using the Postman API. Use with the Board Third Party Library - Mock Admin environment.",
+    "name": "Postman Admin - Board Enthusiasts Mock Provisioning",
+    "description": "Provision and inspect the Postman mock server for the Board Enthusiasts contract tests using the Postman API. Use with the Board Enthusiasts - Mock Admin environment.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -21,17 +21,18 @@
                   "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
                   "var payload = pm.response.json();",
                   "var collections = (payload && payload.collections) || [];",
-                  "var contractTestsName = pm.environment.get(\"contractTestsCollectionName\") || \"Board Third Party Library API (Contract Tests)\";",
+                  "var contractTestsName = pm.environment.get(\"contractTestsCollectionName\") || \"Board Enthusiasts API (Contract Tests)\";",
                   "var configuredMockSourceName = pm.environment.get(\"mockSourceCollectionName\");",
                   "var targetName = configuredMockSourceName || contractTestsName;",
                   "if (!configuredMockSourceName) { pm.environment.set(\"mockSourceCollectionName\", targetName); }",
                   "var targetPostmanId = pm.environment.get(\"mockSourceCollectionPostmanId\") || \"\";",
+                  "var candidateNames = [targetName].filter(function (name) { return typeof name === \"string\" && name.trim().length > 0; }).map(function (name) { return name.trim(); });",
                   "var exactTarget = targetPostmanId ? collections.find(function (c) {",
                   "  return c && c.uid && c.uid.split(\"-\").slice(1).join(\"-\") === targetPostmanId;",
                   "}) : null;",
-                  "var exactNameMatches = collections.filter(function (c) { return c && c.name === targetName; });",
+                  "var exactNameMatches = collections.filter(function (c) { return c && candidateNames.indexOf(c.name) >= 0; });",
                   "var generatedPrefixMatches = collections.filter(function (c) {",
-                  "  return c && c.name && c.name.indexOf(\"Board Third Party Library API (Generated\") === 0;",
+                  "  return c && c.name && c.name.indexOf(\"Board Enthusiasts API (Generated\") === 0;",
                   "});",
                   "var prefixTarget = (!exactNameMatches.length && generatedPrefixMatches.length === 1) ? generatedPrefixMatches[0] : null;",
                   "var fallbackTarget = exactNameMatches[0] || prefixTarget || null;",
@@ -91,7 +92,8 @@
                   "});",
                   "var workspaceId = pm.environment.get(\"workspaceId\");",
                   "var mockServerName = pm.environment.get(\"mockServerName\");",
-                  "var runtimeEnvName = pm.environment.get(\"mockRuntimeEnvironmentName\") || \"Board Third Party Library - Mock\";",
+                  "var runtimeEnvName = pm.environment.get(\"mockRuntimeEnvironmentName\") || \"Board Enthusiasts - Mock\";",
+                  "var runtimeEnvNames = [runtimeEnvName].filter(function (name) { return typeof name === \"string\" && name.trim().length > 0; }).map(function (name) { return name.trim(); });",
                   "",
                   "function syncRuntimeEnvBaseUrl(mockUrl) {",
                   "  if (!mockUrl) { return; }",
@@ -173,14 +175,14 @@
                   "    var envListPayload = envListRes.json();",
                   "    var envs = (envListPayload && envListPayload.environments) || [];",
                   "    var resolvedRuntimeEnvId = pm.environment.get(\"mockRuntimeEnvironmentId\") || \"\";",
-                  "    var matchingByName = envs.filter(function (e) { return e && e.name === runtimeEnvName; });",
+                  "    var matchingByName = envs.filter(function (e) { return e && runtimeEnvNames.indexOf(e.name) >= 0; });",
                   "    var exactIdMatch = resolvedRuntimeEnvId ? envs.find(function (e) { return e && String(e.id) === resolvedRuntimeEnvId; }) : null;",
                   "    var runtimeEnv = null;",
-                  "    if (exactIdMatch && exactIdMatch.name === runtimeEnvName) {",
+                  "    if (exactIdMatch && runtimeEnvNames.indexOf(exactIdMatch.name) >= 0) {",
                   "      runtimeEnv = exactIdMatch;",
                   "    } else if (matchingByName.length === 1) {",
                   "      runtimeEnv = matchingByName[0];",
-                  "    } else if (matchingByName.length > 1 && exactIdMatch && exactIdMatch.name === runtimeEnvName) {",
+                  "    } else if (matchingByName.length > 1 && exactIdMatch && runtimeEnvNames.indexOf(exactIdMatch.name) >= 0) {",
                   "      runtimeEnv = exactIdMatch;",
                   "    } else if (matchingByName.length > 0) {",
                   "      runtimeEnv = matchingByName[0];",
@@ -192,12 +194,12 @@
                   "      pm.environment.unset(\"mockRuntimeEnvironmentResolutionWarning\");",
                   "    }",
                   "    pm.test(\"Runtime mock environment exists for auto-sync\", function () {",
-                  "      pm.expect(runtimeEnv, \"Environment not found: \" + runtimeEnvName).to.exist;",
+                  "      pm.expect(runtimeEnv, \"Environment not found. Tried: \" + runtimeEnvNames.join(\", \")).to.exist;",
                   "    });",
                   "    if (!runtimeEnv || !runtimeEnv.id) { return; }",
                   "",
                   "    pm.environment.set(\"mockRuntimeEnvironmentId\", String(runtimeEnv.id));",
-                  "    if (runtimeEnv.name === runtimeEnvName) { pm.environment.unset(\"mockRuntimeEnvironmentResolutionWarning\"); }",
+                  "    if (runtimeEnvNames.indexOf(runtimeEnv.name) >= 0) { pm.environment.unset(\"mockRuntimeEnvironmentResolutionWarning\"); }",
                   "    doSync(String(runtimeEnv.id));",
                   "  });",
                   "}",
@@ -346,7 +348,7 @@
                 "collections"
               ]
             },
-            "description": "One-step admin request that resolves the mock source collection UID (default: Contract Tests collection), validates the resolved collection snapshot contains expected routes/examples, creates a new mock server from it, stores mockId/mockUrl, and attempts to auto-sync the Board Third Party Library - Mock environment baseUrl. Use the Board Third Party Library - Mock Admin environment."
+            "description": "One-step admin request that resolves the mock source collection UID (default: Contract Tests collection), validates the resolved collection snapshot contains expected routes/examples, creates a new mock server from it, stores mockId/mockUrl, and attempts to auto-sync the Board Enthusiasts - Mock environment baseUrl. Use the Board Enthusiasts - Mock Admin environment."
           },
           "response": []
         }
@@ -381,7 +383,7 @@
                   "  }",
                   "}",
                   "var runtimeEnvId = pm.environment.get(\"mockRuntimeEnvironmentId\");",
-                  "var runtimeEnvName = pm.environment.get(\"mockRuntimeEnvironmentName\") || \"Board Third Party Library - Mock\";",
+                  "var runtimeEnvName = pm.environment.get(\"mockRuntimeEnvironmentName\") || \"Board Enthusiasts - Mock\";",
                   "var apiBase = pm.environment.get(\"postmanApiBaseUrl\") || \"https://api.getpostman.com\";",
                   "var apiKey = pm.variables.replaceIn(\"{{vault:postman-api-key}}\");",
                   "if (mockUrl && runtimeEnvId && apiKey && apiKey.indexOf(\"{{vault:\") !== 0) {",
@@ -540,7 +542,7 @@
                 "mocks"
               ]
             },
-            "description": "Lists mock servers and updates mockId/mockUrl for mockServerName when present. Use the Board Third Party Library - Mock Admin environment."
+            "description": "Lists mock servers and updates mockId/mockUrl for mockServerName when present. Use the Board Enthusiasts - Mock Admin environment."
           },
           "response": []
         }
@@ -568,10 +570,11 @@
                   "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
                   "var payload = pm.response.json();",
                   "var envs = (payload && payload.environments) || [];",
-                  "var targetName = pm.environment.get(\"mockRuntimeEnvironmentName\") || \"Board Third Party Library - Mock\";",
-                  "var target = envs.find(function (e) { return e && e.name === targetName; });",
+                  "var targetName = pm.environment.get(\"mockRuntimeEnvironmentName\") || \"Board Enthusiasts - Mock\";",
+                  "var candidateNames = [targetName].filter(function (name) { return typeof name === \"string\" && name.trim().length > 0; }).map(function (name) { return name.trim(); });",
+                  "var target = envs.find(function (e) { return e && candidateNames.indexOf(e.name) >= 0; });",
                   "pm.test(\"Mock runtime environment exists\", function () {",
-                  "  pm.expect(target, \"Environment not found: \" + targetName).to.exist;",
+                  "  pm.expect(target, \"Environment not found. Tried: \" + candidateNames.join(\", \")).to.exist;",
                   "});",
                   "if (target && target.id) { pm.environment.set(\"mockRuntimeEnvironmentId\", String(target.id)); }"
                 ]
@@ -601,7 +604,7 @@
                 "environments"
               ]
             },
-            "description": "Finds the Board Third Party Library - Mock environment and stores its Postman environment ID in mockRuntimeEnvironmentId."
+            "description": "Finds the Board Enthusiasts - Mock environment and stores its Postman environment ID in mockRuntimeEnvironmentId."
           },
           "response": []
         },
@@ -672,7 +675,7 @@
                 "{{mockRuntimeEnvironmentId}}"
               ]
             },
-            "description": "Fallback/manual helper that updates the Board Third Party Library - Mock environment baseUrl to match mockUrl using the Postman API."
+            "description": "Fallback/manual helper that updates the Board Enthusiasts - Mock environment baseUrl to match mockUrl using the Postman API."
           },
           "response": []
         }

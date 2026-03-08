@@ -1,6 +1,6 @@
 param(
-    [string]$CollectionPath = "postman/collections/board-third-party-library-api.contract-tests.postman_collection.json",
-    [string]$EnvironmentPath = "postman/environments/board-third-party-library_local.postman_environment.json",
+    [string]$CollectionPath = "postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json",
+    [string]$EnvironmentPath = "postman/environments/board-enthusiasts_local.postman_environment.json",
     [string]$BaseUrl = "https://localhost:7085",
     [ValidateSet("live", "mock")]
     [string]$ContractExecutionMode = "live",

@@ -13,9 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  COLLECTION_PATH: postman/collections/board-third-party-library-api.contract-tests.postman_collection.json
-  ENVIRONMENT_PATH: postman/environments/board-third-party-library_mock.postman_environment.json
-  ADMIN_ENVIRONMENT_PATH: postman/environments/board-third-party-library_mock-admin.postman_environment.json
+  COLLECTION_PATH: postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json
+  ENVIRONMENT_PATH: postman/environments/board-enthusiasts_mock.postman_environment.json
+  ADMIN_ENVIRONMENT_PATH: postman/environments/board-enthusiasts_mock-admin.postman_environment.json
 
 jobs:
   api-lint:
@@ -34,7 +34,7 @@ jobs:
 
       - name: Lint OpenAPI specification
         run: >-
-          npx @redocly/cli lint postman/specs/board-third-party-library-api.v1.openapi.yaml
+          npx @redocly/cli lint postman/specs/board-enthusiasts-api.v1.openapi.yaml
           --skip-rule info-license
           --skip-rule no-server-example.com
           --skip-rule operation-4xx-response
@@ -84,8 +84,8 @@ jobs:
           postman-cli-version: 1.29.5
           working-directory: .
           command: >-
-            collection run postman/collections/board-third-party-library-api.contract-tests.postman_collection.json
-            --environment postman/environments/board-third-party-library_mock.postman_environment.json
+            collection run postman/collections/board-enthusiasts-api.contract-tests.postman_collection.json
+            --environment postman/environments/board-enthusiasts_mock.postman_environment.json
             --env-var baseUrl=${{ steps.provision_mock.outputs.base_url }}
             --env-var contractExecutionMode=mock
             --bail failure
